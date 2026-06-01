@@ -1,0 +1,258 @@
+ORGANIZATION_BLOCK MAIN:OB1
+TITLE=主程序
+BEGIN
+Network 1 // 首次扫描初始化
+LD     SM0.1
+CALL   SBR0
+Network 2 // 模拟量处理与报警
+LD     SM0.0
+CALL   SBR1
+Network 3 // 流量计算
+LD     SM0.0
+CALL   SBR2
+Network 4 // 物理急停逻辑 (最高优先级)
+LD     I0.3
+EU
+O      V2303.0 // 压力超限
+O      V2303.1 // 阳极液位超限
+O      V2303.2 // 阴极液位超限
+CALL   SBR4
+Network 5 // 开关机顺控
+LD     SM0.0
+CALL   SBR3
+END_ORGANIZATION_BLOCK
+
+SUBROUTINE_BLOCK SBR_INIT:SBR0
+TITLE=初始化参数
+BEGIN
+Network 1 // 设置HMI默认参数 (首次扫描执行)
+LD     SM0.1
+MOVR   1.5, VD2000 // 压力报警上限 MPa
+MOVR   10.0, VD2004 // 液位报警下限 %
+MOVR   0.2, VD2008 // 泵启动允许压力 MPa
+MOVR   80.0, VD2012 // 制水完成液位 %
+MOVR   2223.0, VD2016 // 流量计K系数
+MOVW   13824, VW2020 // 默认泵速 (50%)
+MOVW   18000, VW2022 // 关机空压机延时 30min
+Network 2 // 初始化高速计数器 (单路霍尔模式0)
+LD     SM0.1
+MOVB   16#F8, SMB37
+HDEF   0, 0
+HSC    0
+MOVB   16#F8, SMB47
+HDEF   1, 0
+HSC    1
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_ANALOG:SBR1
+TITLE=模拟量处理
+BEGIN
+Network 1 // AIW16 压力转换 0-1.6MPa
+LD     SM0.0
+ITD    AIW16, AC0
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     1.6, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2100
+Network 2 // 压力下限截断
+LD     SM0.0
+AR<    VD2100, 0.0
+MOVR   0.0, VD2100
+Network 3 // AIW18 阳极液位转换 0-100%
+LD     SM0.0
+ITD    AIW18, AC0
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     100.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2104
+Network 4 // 阳极液位截断
+LD     SM0.0
+AR<    VD2104, 0.0
+MOVR   0.0, VD2104
+Network 5 // AIW20 阴极液位转换 0-100%
+LD     SM0.0
+ITD    AIW20, AC0
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     100.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2108
+Network 6 // 阴极液位截断
+LD     SM0.0
+AR<    VD2108, 0.0
+MOVR   0.0, VD2108
+Network 7 // 报警: 压力超上限
+LD     SM0.0
+AR>    VD2100, VD2000
+=      V2303.0
+Network 8 // 报警: 阳极液位过低
+LD     SM0.0
+AR<    VD2104, VD2004
+=      V2303.1
+Network 9 // 报警: 阴极液位过低
+LD     SM0.0
+AR<    VD2108, VD2004
+=      V2303.2
+Network 10 // 阳极泵速输出 (运行)
+LD     M1.0
+MOVW   VW2020, AQW32
+Network 11 // 阳极泵速输出 (停止)
+LDN    M1.0
+MOVW   0, AQW32
+Network 12 // 阴极泵速输出 (运行)
+LD     M1.1
+MOVW   VW2020, AQW34
+Network 13 // 阴极泵速输出 (停止)
+LDN    M1.1
+MOVW   0, AQW34
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_FLOW:SBR2
+TITLE=流量计算
+BEGIN
+Network 1 // 1秒节拍器
+LD     SM0.0
+AN     T42
+TON    T42, +100
+Network 2 // 流量计1 (HSC0/I0.0) 脉冲差分
+LD     T42
+MOVD   HC0, VD1200
+MOVD   VD1200, VD1208
+-D     VD1204, VD1208
+MOVD   VD1200, VD1204
+Network 3 // 流量计2 (HSC1/I0.6) 脉冲差分
+LD     T42
+MOVD   HC1, VD1220
+MOVD   VD1220, VD1228
+-D     VD1224, VD1228
+MOVD   VD1220, VD1224
+Network 4 // 流量计1瞬时与累计 (L/min, L)
+LD     SM0.0
+DTR    VD1208, AC0
+*R     60.0, AC0
+/R     VD2016, AC0
+MOVR   AC0, VD1310
+DTR    VD1200, AC1
+/R     VD2016, AC1
+MOVR   AC1, VD1314
+Network 5 // 流量计2瞬时与累计 (L/min, L)
+LD     SM0.0
+DTR    VD1228, AC0
+*R     60.0, AC0
+/R     VD2016, AC0
+MOVR   AC0, VD1330
+DTR    VD1220, AC1
+/R     VD2016, AC1
+MOVR   AC1, VD1334
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_SEQ:SBR3
+TITLE=顺控逻辑
+BEGIN
+Network 1 // 开机指令 (HMI或物理I0.1)
+LD     V2302.0
+O      I0.1
+EU
+MOVB   10, VB100
+Network 2 // 关机指令 (HMI或物理I0.2)
+LD     V2302.1
+O      I0.2
+EU
+MOVB   10, VB101
+Network 3 // 制水判断：阳极未满
+LD     SM0.0
+LDB=   VB100, 10
+AR<    VD2104, VD2012
+S      Q0.0, 1 // 阳极补水阀
+Network 4 // 制水判断：阴极未满
+LD     SM0.0
+LDB=   VB100, 10
+AR<    VD2108, VD2012
+S      Q0.1, 1 // 阴极补水阀
+Network 5 // 启动制水机 (任意一桶未满)
+LD     Q0.0
+O      Q0.1
+S      Q0.2, 1 // 制水机
+Network 6 // 停止制水机 (两桶均满)
+LDN    Q0.0
+AN     Q0.1
+R      Q0.2, 1
+Network 7 // 双桶制水完成跳下一步
+LD     SM0.0
+LDB=   VB100, 10
+AR>=   VD2104, VD2012
+AR>=   VD2108, VD2012
+R      Q0.0, 3
+MOVB   20, VB100
+Network 8 // 启动空压机
+LD     SM0.0
+LDB=   VB100, 20
+S      Q0.3, 1 // 空压机
+MOVB   30, VB100
+Network 9 // 延时3秒开阳极电磁阀
+LD     SM0.0
+LDB=   VB100, 30
+TON    T37, +30
+Network 10
+LD     T37
+S      Q0.4, 1 // 阳极电磁阀
+MOVB   40, VB100
+Network 11 // 延时3秒开阳极泵
+LD     SM0.0
+LDB=   VB100, 40
+TON    T38, +30
+Network 12
+LD     T38
+S      M1.0, 1 // 阳极泵软标志(控制AQW)
+Network 13 // 压力达标跳下一步
+LD     SM0.0
+LDB=   VB100, 40
+AR>=   VD2100, VD2008
+MOVB   50, VB100
+Network 14 // 开阴极泵
+LD     SM0.0
+LDB=   VB100, 50
+S      M1.1, 1 // 阴极泵软标志(控制AQW)
+TON    T39, +30
+Network 15 // 延时3秒开阴极电磁阀
+LD     T39
+S      Q0.5, 1 // 阴极电磁阀
+MOVB   60, VB100
+Network 16 // 延时5分钟开直流电源
+LD     SM0.0
+LDB=   VB100, 60
+TON    T40, +3000
+Network 17
+LD     T40
+S      Q0.6, 1 // 直流电源
+MOVB   100, VB100
+Network 18 // 关机指令触发
+LD     SM0.0
+LDB=   VB101, 10
+R      Q0.0, 8 // 停所有电磁阀、电源等
+R      M1.0, 2 // 停AQW输出
+S      M10.1, 1 // 关机延时标志
+MOVB   0, VB101
+Network 19 // 关机延时计时 (空压机维持)
+LD     SM0.0
+A      M10.1
+TON    T41, VW2022
+Network 20 // 延时到达关空压机
+LD     T41
+R      Q0.3, 1 // 停空压机
+R      M10.1, 1
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_EMG:SBR4
+TITLE=急停保护
+BEGIN
+Network 1 // 急停复位所有输出与状态
+LD     SM0.0
+R      Q0.0, 8
+R      M1.0, 2
+MOVB   0, VB100
+MOVB   0, VB101
+R      M10.1, 1
+END_SUBROUTINE_BLOCK

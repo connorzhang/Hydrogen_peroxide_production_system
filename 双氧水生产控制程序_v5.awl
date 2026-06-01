@@ -1,0 +1,37 @@
+ORGANIZATION_BLOCK OB1
+
+NETWORK 1
+      LD     SM0.1
+      MOVB   0, VB0
+
+NETWORK 2
+      LD     I0.0
+      O      Q0.6
+      AN     I0.1
+      AN     I0.2
+      =      Q0.6
+
+NETWORK 3
+      LD     I0.1
+      AN     I0.0
+      AN     I0.2
+      =      Q0.0
+
+NETWORK 4
+      LD     I0.2
+      R      Q0.6, 1
+      R      Q0.0, 1
+
+NETWORK 5
+      LD     Q0.6
+      =      Q0.5
+
+NETWORK 6
+      LD     Q0.6
+      TON    T37, 30
+
+NETWORK 7
+      LD     T37
+      =      Q0.4
+
+END_ORGANIZATION_BLOCK

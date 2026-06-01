@@ -1,0 +1,983 @@
+D A T A  S H E E T
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland
+Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88
+www.digmesa.com
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 1-9
+FHK G1/4“ Arnite
+Part number: 937-15XX/F01
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 2-9
+General Description
+Dimensions in mm:
+The FHK Flowmeter is a general-purpose device; 
+its working range can be individually defined 
+according to its nozzle size. It is employed for 
+measuring, regulating or metering and guaran-
+tees most precise measurement of fluid quanti-
+ties. In addition, a pulse generator integrated into 
+the flowmeter guarantees a practically unlimited 
+useful life.
+Specific applications: Inlet and outlet on the 
+same side, compact design, great working range, 
+depending on the nozzle diameter.
+Options: 
+3-pin solenoid socket
+Item number: 941-0002/3
+Special regulations which must be complied with 
+by the flowmeter manufacturer apply to each coun-
+try, e.g. CE, NSF, FDA and SK. The various media 
+flowing through the flowmeter differ from applica-
+tion to application. You are advised to enquire with 
+the medium manufacturer as to whether the entire 
+installation and the flowmeter are resistant to the 
+medium itself (see Material)!
+RESISTANCE
+DIGMESA electronic circuitry is always designed 
+for operation with DIGMESA flowmeters. Please 
+note the following if connecting to other elec-
+tronic circuitry:
+•The flowmeter does not supply an output 
+voltage but switches the signal terminal to 0 
+V ground (actuated) or leaves it open (non-
+actuated)
+•There must be a pull-up resistor between 
+power supply + and signal depending on 
+electronic circuitry!
+ELECTRONIC
+Material:
+Housing: 
+PBT 35%GF (Arnite)
+Bearing pin: 
+Inox 1.4305 (18/8)
+Nozzel: 
+Ø 1.0, 1.2, 2.0, 2.5mm 
+ 
+PPS 40%GF (Ryton) 
+Nozzel: 
+Ø 5.6mm like housing
+O-ring: 
+MVQ (Silikon)
+Turbine: 
+PVDF
+Magnets: 
+Keramik Sr Fe O 
+ 
+(in contact with the medium)
+Screw: 
+PT-screws 
+ 
+(Phillips cross recessed)
+Technical data:
+Flow rate: 
+0.027 - 8.30 l/min depending 
+ 
+on the nozzle diameter
+Measuring accuracy: +/- 2.0%
+Repetition: 
+<+/- 0.25%
+Temperature range: -10°C to +65°C
+ 
+14°F to 149°F
+Pressure range: 
+20 bar at 20°C
+ 
+290 psi /68°F
+Mounting position: 
+Horizontal
+Nozzle size: 
+Ø 1.0, 1.2, 2.0, 2.5, 5.6mm
+Electrical connection ratings:
+Power supply: 
++3.8 to +24 VDC
+Consumption: 
+<8 mA
+Signal connection: 
+Open collector NPN
+Signal voltage:  
+0 VDC GND 
+ 
+(saturation <0.7 V)
+Signal load:  
+max. 20 mA
+Leakage current: 
+max. 10 μA
+Connections: 
+3-pin AMP 2.8 x 0.8 mm
+Signal: 
+Square-wave output
+Duty Cycle: 
+~50%
+*
+Approvals / Standards
+EN55014-1:00+A1:01+A2:02, EN61000-
+6-3:01+A11:04 , IEC61000-6-3:06(ed.2.0),   
+EN61000-3-2:06, IEC61000-3-2:05(ed.3.0), 
+EN61000-3-3:95+A1:01+A2:05, IEC61000-
+3-3:94+A1:01+A2:05(Cons.ed 1.2), 
+EN55014-2:97+A1:01, EN61000-6-1:01, 
+IEC61000-6-1:05(ed.2)
+54
+66.60
+wrench size 19
+38.70
+IN
+OUT
+2 x G1/4"
+12
+20
+47.20
+39
+14
+14
+14
+19
+3 x
+3.40
+Horizontal position is, when the contacts
+are facing up.
+*
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 3-9
+Interface Connection: Examples Open Collector
++ 3.8VDC     Rx=750Ω
++   5 VDC     Rx=1k0
++ 12 VDC     Rx=4k7
++ 24 VDC     Rx=10k
+optocoupler interface
+0 VDC
+Signal
++
+Rx
+100nF
+Signal
+0 VDC
++3.8 to +24 VDC
++5 VDC
+4k7
+open collector
+0 VDC
+simple circuit
+Signal
++
++3.8 to +24 VDC
+4k7
+100nF
+Signal
+open collector
+1N4148
+TTL output
+Signal
++
++3.8 to +24 VDC
+2k2
+100nF
+Signal
+0 VDC
++5  VDC
+1N4148
+open collector
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 4-9
+Measurement Curve FHK 1.00 mm (#937-1510/F01)
+The values specified must be considered as approximate values.
+The number of pulses per litre may differ depending on medium and installation.
+We recommend to calibrate the number of pulses per litre in line with the complete 
+installation.
+• Ensure that there is no fast-pulsatory 
+movement of the media
+• Ensure that there are no reverse pressure 
+surges
+• Ensure that there is no air in the system
+• Note the mounting position of the flowmeter
+• Min/max flow should be in the linear range 
+of the selected flowmeter
+• Clean the system at appropriate intervals
+• Avoid electrical current peaks
+• Incorrect cabling of power supply +, signal 
+and ground will destroy the flowmeter
+• Do not mechanically load electrical contacts
+• Avoid moisture on the electrical contacts
+• Avoid stray pick-up via the cable (Do not lay 
+cables in parallel with high current loads)
+MEASUREMENT 
+TIPS
+Nozzle size 
+Pulses/litre 
+g/pulse 
+min. flow rate 
+max. flow rate 
+Pressure loss
+ 
+ 
+ 
+in litres/min at in litres/min 
+ 
+ 
+ 
+ 
+Linear start
+ Ø 1.00 mm 
+2223 
+0.4499 
+0.0274 
+0.5867 
+ 1.00
+ Ø 1.20 mm 
+1787 
+0.5595 
+0.0315 
+0.7777 
+ 1.00
+ Ø 2.00 mm 
+1013 
+0.9869 
+0.1109 
+2.3268 
+ 1.00
+ Ø 2.50 mm 
+754 
+1.3252 
+0.0673 
+2.7421 
+ 0.60
+ Ø 5.60 mm 
+256 
+3.9100 
+0.1802 
+8.3080 
+ 0.90
+Medium: Water / max. Pressure: 3.3 bar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'UXFNYHUOXVWSUHVVXUHGURSEDU
+'UXFNYHUOXVWSUHVVXUHGURS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$EZHLFKXQJGHYLDWLRQ
+/LQHDULWlWOLQHDULW\
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 5-9
+Measurement Curve FHK 1.20 mm (#937-1512/F01)
+The values specified must be considered as approximate values.
+The number of pulses per litre may differ depending on medium and installation.
+We recommend to calibrate the number of pulses per litre in line with the complete 
+installation.
+• Ensure that there is no fast-pulsatory 
+movement of the media
+• Ensure that there are no reverse pressure 
+surges
+• Ensure that there is no air in the system
+• Note the mounting position of the flowmeter
+• Min/max flow should be in the linear range 
+of the selected flowmeter
+• Clean the system at appropriate intervals
+• Avoid electrical current peaks
+• Incorrect cabling of power supply +, signal 
+and ground will destroy the flowmeter
+• Do not mechanically load electrical contacts
+• Avoid moisture on the electrical contacts
+• Avoid stray pick-up via the cable (Do not lay 
+cables in parallel with high current loads)
+MEASUREMENT 
+TIPS
+Nozzle size 
+Pulses/litre 
+g/pulse 
+min. flow rate 
+max. flow rate 
+Pressure loss
+ 
+ 
+ 
+in litres/min at in litres/min 
+ 
+ 
+ 
+ 
+Linear start
+ Ø 1.00 mm 
+2223 
+0.4499 
+0.0274 
+0.5867 
+ 1.00
+ Ø 1.20 mm 
+1787 
+0.5595 
+0.0315 
+0.7777 
+ 1.00
+ Ø 2.00 mm 
+1013 
+0.9869 
+0.1109 
+2.3268 
+ 1.00
+ Ø 2.50 mm 
+754 
+1.3252 
+0.0673 
+2.7421 
+ 0.60
+ Ø 5.60 mm 
+256 
+3.9100 
+0.1802 
+8.3080 
+ 0.90
+Medium: Water / max. Pressure: 3.3 bar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'UXFNYHUOXVWSUHVVXUHGURSEDU
+'UXFNYHUOXVWSUHVVXUHGURS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$EZHLFKXQJGHYLDWLRQ
+/LQHDULWlWOLQHDULW\
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 6-9
+Measurement Curve FHK 2.00 mm (#937-1520/F01)
+The values specified must be considered as approximate values.
+The number of pulses per litre may differ depending on medium and installation.
+We recommend to calibrate the number of pulses per litre in line with the complete 
+installation.
+• Ensure that there is no fast-pulsatory 
+movement of the media
+• Ensure that there are no reverse pressure 
+surges
+• Ensure that there is no air in the system
+• Note the mounting position of the flowmeter
+• Min/max flow should be in the linear range 
+of the selected flowmeter
+• Clean the system at appropriate intervals
+• Avoid electrical current peaks
+• Incorrect cabling of power supply +, signal 
+and ground will destroy the flowmeter
+• Do not mechanically load electrical contacts
+• Avoid moisture on the electrical contacts
+• Avoid stray pick-up via the cable (Do not lay 
+cables in parallel with high current loads)
+MEASUREMENT 
+TIPS
+Nozzle size 
+Pulses/litre 
+g/pulse 
+min. flow rate 
+max. flow rate 
+Pressure loss
+ 
+ 
+ 
+in litres/min at in litres/min 
+ 
+ 
+ 
+ 
+Linear start
+ Ø 1.00 mm 
+2223 
+0.4499 
+0.0274 
+0.5867 
+ 1.00
+ Ø 1.20 mm 
+1787 
+0.5595 
+0.0315 
+0.7777 
+ 1.00
+ Ø 2.00 mm 
+1013 
+0.9869 
+0.1109 
+2.3268 
+ 1.00
+ Ø 2.50 mm 
+754 
+1.3252 
+0.0673 
+2.7421 
+ 0.60
+ Ø 5.60 mm 
+256 
+3.9100 
+0.1802 
+8.3080 
+ 0.90
+Medium: Water / max. Pressure: 3.3 bar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+'UXFNYHUOXVWSUHVVXUHGURSEDU
+'UXFNYHUOXVWSUHVVXUHGURS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$EZHLFKXQJGHYLDWLRQ
+/LQHDULWlWOLQHDULW\
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 7-9
+Measurement Curve FHK 2.50 mm  (#937-1525/F01)
+The values specified must be considered as approximate values.
+The number of pulses per litre may differ depending on medium and installation.
+We recommend to calibrate the number of pulses per litre in line with the complete 
+installation.
+• Ensure that there is no fast-pulsatory 
+movement of the media
+• Ensure that there are no reverse pressure 
+surges
+• Ensure that there is no air in the system
+• Note the mounting position of the flowmeter
+• Min/max flow should be in the linear range 
+of the selected flowmeter
+• Clean the system at appropriate intervals
+• Avoid electrical current peaks
+• Incorrect cabling of power supply +, signal 
+and ground will destroy the flowmeter
+• Do not mechanically load electrical contacts
+• Avoid moisture on the electrical contacts
+• Avoid stray pick-up via the cable (Do not lay 
+cables in parallel with high current loads)
+MEASUREMENT 
+TIPS
+Nozzle size 
+Pulses/litre 
+g/pulse 
+min. flow rate 
+max. flow rate 
+Pressure loss
+ 
+ 
+ 
+in litres/min at in litres/min 
+ 
+ 
+ 
+ 
+Linear start
+ Ø 1.00 mm 
+2223 
+0.4499 
+0.0274 
+0.5867 
+ 1.00
+ Ø 1.20 mm 
+1787 
+0.5595 
+0.0315 
+0.7777 
+ 1.00
+ Ø 2.00 mm 
+1013 
+0.9869 
+0.1109 
+2.3268 
+ 1.00
+ Ø 2.50 mm 
+754 
+1.3252 
+0.0673 
+2.7421 
+ 0.60
+ Ø 5.60 mm 
+256 
+3.9100 
+0.1802 
+8.3080 
+ 0.90
+Medium: Water / max. Pressure: 3.3 bar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'UXFNYHUOXVWSUHVVXUHGURSEDU
+'UXFNYHUOXVWSUHVVXUHGURS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$EZHLFKXQJGHYLDWLRQ
+/LQHDULWlWOLQHDULW\
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 8-9
+Measurement Curve FHK 5.60 mm (#937-1556/01)
+The values specified must be considered as approximate values.
+The number of pulses per litre may differ depending on medium and installation.
+We recommend to calibrate the number of pulses per litre in line with the complete 
+installation.
+• Ensure that there is no fast-pulsatory 
+movement of the media
+• Ensure that there are no reverse pressure 
+surges
+• Ensure that there is no air in the system
+• Note the mounting position of the flowmeter
+• Min/max flow should be in the linear range 
+of the selected flowmeter
+• Clean the system at appropriate intervals
+• Avoid electrical current peaks
+• Incorrect cabling of power supply +, signal 
+and ground will destroy the flowmeter
+• Do not mechanically load electrical contacts
+• Avoid moisture on the electrical contacts
+• Avoid stray pick-up via the cable (Do not lay 
+cables in parallel with high current loads)
+MEASUREMENT 
+TIPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+'UXFNYHUOXVWSUHVVXUHGURSEDU
+'UXFNYHUOXVWSUHVVXUHGURS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'XUFKIOXVVIORZUDWH/PLQ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$EZHLFKXQJGHYLDWLRQ
+/LQHDULWlWOLQHDULW\
+Medium: Wasser / max. Druck: 3.3 bar
+Nozzle size 
+Pulses/litre 
+g/pulse 
+min. flow rate 
+max. flow rate 
+Pressure loss
+ 
+ 
+ 
+in litres/min at in litres/min 
+ 
+ 
+ 
+ 
+Linear start
+ Ø 1.00 mm 
+2223 
+0.4499 
+0.0274 
+0.5867 
+ 1.00
+ Ø 1.20 mm 
+1787 
+0.5595 
+0.0315 
+0.7777 
+ 1.00
+ Ø 2.00 mm 
+1013 
+0.9869 
+0.1109 
+2.3268 
+ 1.00
+ Ø 2.50 mm 
+754 
+1.3252 
+0.0673 
+2.7421 
+ 0.60
+ Ø 5.60 mm 
+256 
+3.9100 
+0.1802 
+8.3080 
+ 0.90
+
+
+Digmesa AG, Keltenstrasse 31, CH–2563 Ipsach / Switzerland, Phone +41 (32) 332 77 77, Fax +41 (32) 332 77 88, www.digmesa.com
+We reserve the right to make modifications in the interests of technical progress.
+Version 02  FHK G1/4“ SW19  937-15XX/F01 GB      Page 9-9
+ Notes:
+Spare parts:
+PT-screws # 443-0005
+(Phillips cross recessed)
+Upper section FHK Arnite # 532-0500
+O-ring MVQ (Silikon) # 350-0410
+Turbine FT 36 # 527-0303
+Lower section FHK G1/4“ Ø 1.00 mm # 513-6510/FSW19
+Lower section FHK G1/4“ Ø 1.20 mm # 513-6512/FSW19
+Lower section FHK G1/4“ Ø 2.00 mm # 513-6520/FSW19
+Lower section FHK G1/4“ Ø 2.50 mm # 513-6525/FSW19
+Lower section FHK G1/4“ Ø 5.60 mm # 514-6556/SW19

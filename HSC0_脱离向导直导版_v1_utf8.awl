@@ -1,0 +1,38 @@
+ORGANIZATION_BLOCK MAIN:OB1
+TITLE=HSC0_No_Wizard
+BEGIN
+Network 1 
+// 【第一步】完全抛弃向导！用代码直接初始化HSC0（模式0，单相脉冲）
+// 仅首次扫描(SM0.1)执行一次，避免HDEF红框
+LD     SM0.1
+MOVB   16#F8, SMB37
+MOVD   +0, SMD38
+MOVD   +2000000000, SMD42
+HDEF   0, 0
+HSC    0
+
+Network 2 
+// 【第二步】1秒节拍器 (T42, 100ms * 10 = 1s)
+LD     SM0.0
+AN     M10.0
+TON    T42, +10
+
+Network 3 
+// 【第三步】读取真实的 HC0 并计算每秒脉冲数
+// VD1000: 实时总脉冲数
+// VD1004: 缓存的上一秒总脉冲数
+// VD1008: 计算得出的【每秒脉冲增量】(速度)
+LD     T42
+S      M10.0, 1
+MOVD   HC0, VD1000
+MOVD   VD1000, VD1008
+-D     VD1004, VD1008
+MOVD   VD1000, VD1004
+
+Network 4 
+// 【第四步】节拍复位
+LD     M10.0
+AN     T42
+R      M10.0, 1
+
+END_ORGANIZATION_BLOCK

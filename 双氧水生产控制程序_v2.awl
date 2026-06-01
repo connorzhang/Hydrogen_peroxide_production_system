@@ -1,0 +1,319 @@
+ORGANIZATION_BLOCK OB1
+TITLE=Main Program
+VERSION : 0.1
+
+NETWORK 1
+// Initialization
+      LD     SM0.1
+      MOVB   0, VB0.0
+      MOVB   0, VB0.1
+      MOVB   0, VB0.2
+      MOVB   0, VB0.3
+      MOVW   0, C0
+      MOVW   0, C1
+
+NETWORK 2
+// Start Button
+      LD     I0.0
+      O      VB0.1
+      AN     I0.1
+      AN     I0.2
+      =      VB0.1
+
+NETWORK 3
+// Stop Button
+      LD     I0.1
+      O      VB0.2
+      AN     I0.0
+      AN     I0.2
+      =      VB0.2
+
+NETWORK 4
+// Emergency Stop
+      LD     I0.2
+      =      VB0.3
+
+NETWORK 5
+// Reset Button
+      LD     I0.3
+      AN     VB0.0
+      R      VB0.3, 1
+
+NETWORK 6
+// Start Process
+      LD     VB0.1
+      AN     VB0.2
+      AN     VB0.3
+      CALL   SBR0
+
+NETWORK 7
+// Stop Process
+      LD     VB0.2
+      AN     VB0.1
+      AN     VB0.3
+      CALL   SBR1
+
+NETWORK 8
+// Emergency Stop Process
+      LD     VB0.3
+      CALL   SBR2
+
+NETWORK 9
+// Communication
+      LD     SM0.0
+      CALL   SBR3
+
+NETWORK 10
+// PWM Control
+      LD     SM0.0
+      CALL   SBR4
+
+NETWORK 11
+// High Speed Counter
+      LD     SM0.0
+      CALL   SBR5
+
+END_ORGANIZATION_BLOCK
+
+SUBROUTINE_BLOCK SBR0: Start Process
+TITLE=Start Process
+VERSION : 0.1
+
+NETWORK 1
+// Step 1: Power On
+      LD     SM0.0
+      MOVW   1, C0
+      =      Q0.6
+
+NETWORK 2
+// Step 2: Pure Water Machine
+      LD     SM0.0
+      MOVW   2, C0
+      =      Q0.5
+
+NETWORK 3
+// Step 3: Water Supply
+      LD     SM0.0
+      MOVW   3, C0
+      =      Q0.0
+      =      Q0.1
+
+NETWORK 4
+// Check Liquid Level
+      LD     VB100
+      LD     VB104
+      >=I    100
+      >=I    100
+      ALD
+      R      Q0.0, 1
+      R      Q0.1, 1
+      MOVW   4, C0
+
+NETWORK 5
+// Step 4: Air Compressor
+      LD     SM0.0
+      =      Q0.4
+      TON    T37, 30
+
+NETWORK 6
+// Step 5: Anode Solenoid
+      LD     T37
+      MOVW   5, C0
+      =      Q0.2
+      TON    T38, 30
+
+NETWORK 7
+// Step 6: Anode Pump
+      LD     T38
+      MOVW   6, C0
+
+NETWORK 8
+// Check Pressure
+      LD     VD108
+      >=D    100000
+      MOVW   7, C0
+      =      Q0.3
+      TON    T39, 30
+
+NETWORK 9
+// Step 8: Cathode Pump
+      LD     T39
+      MOVW   8, C0
+      TON    T40, 30
+
+NETWORK 10
+// Step 9: Cathode Solenoid
+      LD     T40
+      MOVW   9, C0
+      TON    T41, 30000
+
+NETWORK 11
+// Step 10: DC Power
+      LD     T41
+      MOVW   10, C0
+      MOVB   1, VB0.0
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR1: Stop Process
+TITLE=Stop Process
+VERSION : 0.1
+
+NETWORK 1
+// Step 1: Turn Off DC Power
+      LD     SM0.0
+      MOVW   1, C1
+
+NETWORK 2
+// Step 2: Turn Off Water Supply
+      LD     SM0.0
+      MOVW   2, C1
+      R      Q0.0, 1
+      R      Q0.1, 1
+
+NETWORK 3
+// Step 3: Turn Off Pure Water Machine
+      LD     SM0.0
+      MOVW   3, C1
+      R      Q0.5, 1
+
+NETWORK 4
+// Step 4: Turn Off Cathode System
+      LD     SM0.0
+      MOVW   4, C1
+      R      Q0.3, 1
+
+NETWORK 5
+// Step 5: Turn Off Anode System
+      LD     SM0.0
+      MOVW   5, C1
+      R      Q0.2, 1
+
+NETWORK 6
+// Step 6: Delay
+      LD     SM0.0
+      MOVW   6, C1
+      TON    T42, 1800000
+
+NETWORK 7
+// Step 7: Turn Off Air Compressor
+      LD     T42
+      MOVW   7, C1
+      R      Q0.4, 1
+
+NETWORK 8
+// Step 8: Turn Off Power
+      LD     T42
+      MOVW   8, C1
+      R      Q0.6, 1
+      MOVB   0, VB0.0
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR2: Emergency Stop
+TITLE=Emergency Stop
+VERSION : 0.1
+
+NETWORK 1
+// Turn Off All Outputs
+      LD     SM0.0
+      R      Q0.0, 1
+      R      Q0.1, 1
+      R      Q0.2, 1
+      R      Q0.3, 1
+      R      Q0.4, 1
+      R      Q0.5, 1
+      R      Q0.6, 1
+      MOVB   0, VB0.0
+      MOVB   0, VB0.1
+      MOVB   0, VB0.2
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR3: Communication
+TITLE=Communication
+VERSION : 0.1
+
+NETWORK 1
+// Initialize Communication
+      LD     SM0.1
+      MOVB   96, SMB30
+
+NETWORK 2
+// Read Level Sensors
+      LD     SM0.0
+      MOVB   2, VB200
+      MOVB   3, VB201
+
+NETWORK 3
+// Read Pressure Sensors
+      LD     SM0.0
+      MOVB   4, VB200
+      MOVB   3, VB201
+
+NETWORK 4
+// Control DC Power
+      LD     VB0.0
+      MOVB   1, VB200
+      MOVB   6, VB201
+      MOVW   5000, VW202
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR4: PWM Control
+TITLE=PWM Control
+VERSION : 0.1
+
+NETWORK 1
+// Initialize PWM
+      LD     SM0.1
+      MOVB   16#80, SMB67
+      MOVW   1000, SMW68
+      MOVW   500, SMW70
+      PWM    0, 1
+      MOVB   16#80, SMB77
+      MOVW   1000, SMW78
+      MOVW   500, SMW80
+      PWM    1, 1
+
+NETWORK 2
+// Adjust PWM Based on Pressure
+      LD     VB0.0
+      LD     VD108
+      >=D    100000
+      MOVW   300, SMW70
+      LD     VD108
+      <D     95000
+      MOVW   700, SMW70
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR5: High Speed Counter
+TITLE=High Speed Counter
+VERSION : 0.1
+
+NETWORK 1
+// Initialize HSC0
+      LD     SM0.1
+      MOVB   16#FC, SMB37
+      MOVW   0, SMW38
+      MOVW   0, SMW42
+      HDEF   0, 0
+      HSC    0
+
+NETWORK 2
+// Initialize HSC1
+      LD     SM0.1
+      MOVB   16#FC, SMB47
+      MOVW   0, SMW48
+      MOVW   0, SMW52
+      HDEF   1, 0
+      HSC    1
+
+NETWORK 3
+// Read Counter Values
+      LD     SM0.0
+      MOVW   HC0, VW300
+      MOVW   HC1, VW302
+
+END_SUBROUTINE_BLOCK

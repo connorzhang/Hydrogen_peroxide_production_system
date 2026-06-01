@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid meet">
+  <rect x="0" y="0" width="1200" height="420" fill="#ffffff"/>
+
+  <text x="40" y="60" font-family="Segoe UI, Arial, sans-serif" font-size="32" fill="#111827">模块布局示意（从左到右）</text>
+
+  <rect x="40" y="110" width="360" height="220" rx="16" fill="#e5e7eb" stroke="#111827" stroke-width="2"/>
+  <text x="70" y="160" font-family="Segoe UI, Arial, sans-serif" font-size="28" fill="#111827">CPU ST30</text>
+  <text x="70" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#374151">数字量 I/O：按接线表</text>
+
+  <rect x="430" y="110" width="340" height="220" rx="16" fill="#dbeafe" stroke="#111827" stroke-width="2"/>
+  <text x="460" y="160" font-family="Segoe UI, Arial, sans-serif" font-size="28" fill="#111827">AE08</text>
+  <text x="460" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#374151">8×4-20mA 模拟量输入</text>
+  <text x="460" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#374151">地址：AIW16 ~ AIW30</text>
+
+  <rect x="800" y="110" width="340" height="220" rx="16" fill="#dcfce7" stroke="#111827" stroke-width="2"/>
+  <text x="830" y="160" font-family="Segoe UI, Arial, sans-serif" font-size="28" fill="#111827">AQ02</text>
+  <text x="830" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#374151">2×AO 模拟量输出</text>
+  <text x="830" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#374151">地址：AQW32、AQW34</text>
+
+  <line x1="400" y1="220" x2="430" y2="220" stroke="#111827" stroke-width="3"/>
+  <polygon points="430,220 418,212 418,228" fill="#111827"/>
+
+  <line x1="770" y1="220" x2="800" y2="220" stroke="#111827" stroke-width="3"/>
+  <polygon points="800,220 788,212 788,228" fill="#111827"/>
+
+  <text x="40" y="390" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#6b7280">提示：模块地址以系统块显示为准，本项目已确认 AE08=AIW16 起、AQ02=AQW32 起。</text>
+</svg>

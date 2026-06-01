@@ -1,0 +1,148 @@
+ORGANIZATION_BLOCK MAIN:OB1
+TITLE=Flow Counter Program
+BEGIN
+Network 1
+LD     SM0.1
+MOVB   0, VB100
+MOVB   0, VB101
+R      Q0.0, 8
+MOVW   0, VW1200
+MOVW   0, VW1202
+MOVW   0, VW1210
+MOVW   0, VW1212
+
+Network 2
+LD     SM0.1
+MOVB   16#F8, SMB37
+MOVW   0, SMW38
+MOVW   0, SMW42
+HDEF   0, 0
+HSC    0
+
+Network 3
+LD     SM0.1
+MOVB   16#F8, SMB47
+MOVW   0, SMW48
+MOVW   0, SMW52
+HDEF   1, 0
+HSC    1
+
+Network 4
+LD     SM0.0
+TON    T37, 100
+
+Network 5
+LD     T37
+MOVW   SMW38, VW1200
+MOVW   SMW48, VW1202
+
+Network 6
+LD     T37
+MOVW   0, SMW38
+MOVW   0, SMW48
+MOVB   16#F8, SMB37
+HSC    0
+MOVB   16#F8, SMB47
+HSC    1
+
+Network 7
+LD     SM0.0
+AW>=   VW1200, 1
+MOVW   27, VW1210
+
+Network 8
+LD     SM0.0
+AW>=   VW1200, 2
+MOVW   54, VW1210
+
+Network 9
+LD     SM0.0
+AW>=   VW1200, 3
+MOVW   81, VW1210
+
+Network 10
+LD     SM0.0
+AW>=   VW1200, 4
+MOVW   108, VW1210
+
+Network 11
+LD     SM0.0
+AW>=   VW1200, 5
+MOVW   135, VW1210
+
+Network 12
+LD     SM0.0
+AW>=   VW1200, 6
+MOVW   162, VW1210
+
+Network 13
+LD     SM0.0
+AW>=   VW1200, 7
+MOVW   189, VW1210
+
+Network 14
+LD     SM0.0
+AW>=   VW1200, 8
+MOVW   216, VW1210
+
+Network 15
+LD     SM0.0
+AW>=   VW1200, 9
+MOVW   243, VW1210
+
+Network 16
+LD     SM0.0
+AW>=   VW1200, 10
+MOVW   270, VW1210
+
+Network 17
+LD     SM0.0
+AW>=   VW1202, 1
+MOVW   27, VW1212
+
+Network 18
+LD     SM0.0
+AW>=   VW1202, 2
+MOVW   54, VW1212
+
+Network 19
+LD     SM0.0
+AW>=   VW1202, 3
+MOVW   81, VW1212
+
+Network 20
+LD     SM0.0
+AW>=   VW1202, 4
+MOVW   108, VW1212
+
+Network 21
+LD     SM0.0
+AW>=   VW1202, 5
+MOVW   135, VW1212
+
+Network 22
+LD     SM0.0
+AW>=   VW1202, 6
+MOVW   162, VW1212
+
+Network 23
+LD     SM0.0
+AW>=   VW1202, 7
+MOVW   189, VW1212
+
+Network 24
+LD     SM0.0
+AW>=   VW1202, 8
+MOVW   216, VW1212
+
+Network 25
+LD     SM0.0
+AW>=   VW1202, 9
+MOVW   243, VW1212
+
+Network 26
+LD     SM0.0
+AW>=   VW1202, 10
+MOVW   270, VW1212
+
+END_ORGANIZATION_BLOCK

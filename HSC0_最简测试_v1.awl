@@ -1,0 +1,49 @@
+ORGANIZATION_BLOCK MAIN:OB1
+TITLE=HSC0 Minimal Test
+BEGIN
+Network 1
+// 首次扫描：初始化HSC0与变量
+
+LD     SM0.1
+MOVB   16#F8, SMB37
+MOVW   0, SMW38
+MOVW   0, SMW40
+MOVW   0, SMW42
+MOVW   0, SMW44
+HDEF   0, 0
+HSC    0
+MOVW   0, VW1000
+MOVW   0, VW1002
+MOVW   0, VW1004
+R      M10.0, 1
+
+Network 2
+// HSC0保持运行（每扫描调用一次）
+
+LD     SM0.0
+HSC    0
+
+Network 3
+// 1秒节拍（100ms×10）
+
+LD     SM0.0
+AN     M10.0
+TON    T42, 10
+
+Network 4
+// 1秒采样：读取计数并计算增量（Δ脉冲/秒）
+
+LD     T42
+S      M10.0, 1
+MOVW   SMW38, VW1002
+SUBW   VW1004, VW1002, VW1000
+MOVW   VW1002, VW1000
+
+Network 5
+// 释放节拍锁存
+
+LD     M10.0
+AN     T42
+R      M10.0, 1
+
+END_ORGANIZATION_BLOCK

@@ -1,0 +1,165 @@
+import { VerticalBox, HorizontalBox, GridBox } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    title: "双氧水生产系统 - 工作状态监控";
+    width: 1024px;
+    height: 600px;
+    background: #1e1e1e;
+
+    // --- 与 Rust 后端绑定的数据属性 ---
+    // 状态标志
+    in property <bool> q_water_maker: false;
+    in property <bool> q_air_compressor: false;
+    in property <bool> q_valve_anode: false;
+    in property <bool> q_valve_cathode: false;
+    in property <bool> q_dc_power: false;
+    in property <bool> sys_alarm: false;
+
+    // 模拟量数据
+    in property <float> pressure_mpa: 0.0;
+    in property <float> level_anode: 0.0;
+    in property <float> level_cathode: 0.0;
+    in property <float> flow_anode: 0.0;
+    in property <float> flow_cathode: 0.0;
+
+    VerticalBox {
+        padding: 20px;
+        spacing: 20px;
+
+        // 标题栏
+        HorizontalBox {
+            alignment: center;
+            Text {
+                text: "双氧水生产系统实时监控";
+                font-size: 28px;
+                font-weight: 700;
+                color: #e0e0e0;
+            }
+        }
+
+        // 主内容区
+        HorizontalBox {
+            spacing: 40px;
+
+            // 左侧：设备运行状态灯
+            Rectangle {
+                width: 250px;
+                border-color: #333333;
+                border-width: 2px;
+                border-radius: 8px;
+                background: #252526;
+                
+                VerticalBox {
+                    padding: 20px;
+                    spacing: 15px;
+                    Text { text: "设备运行状态"; font-size: 18px; color: #aaaaaa; }
+                    
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_water_maker ? #00ff00 : #555555; }
+                        Text { text: "纯水机组"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_air_compressor ? #00ff00 : #555555; }
+                        Text { text: "空压机组"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_valve_anode ? #00ff00 : #555555; }
+                        Text { text: "阳极电磁阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_valve_cathode ? #00ff00 : #555555; }
+                        Text { text: "阴极电磁阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_dc_power ? #ff3333 : #555555; }
+                        Text { text: "直流电源 (危险)"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.sys_alarm ? #ff0000 : #555555; }
+                        Text { text: "系统综合报警"; color: root.sys_alarm ? #ff0000 : #ffffff; font-size: 16px; font-weight: root.sys_alarm ? 700 : 400; vertical-alignment: center; }
+                    }
+                }
+            }
+
+            // 中间：双液位储罐
+            HorizontalBox {
+                spacing: 60px;
+                alignment: center;
+
+                // 阳极罐
+                VerticalBox {
+                    spacing: 10px;
+                    alignment: center;
+                    Text { text: "阳极储液罐"; color: #ffffff; font-size: 16px; horizontal-alignment: center; }
+                    Rectangle {
+                        width: 120px; height: 300px;
+                        border-color: #555555; border-width: 3px; border-radius: 5px;
+                        // 动态液位填充
+                        Rectangle {
+                            y: parent.height - self.height;
+                            width: 100%;
+                            height: parent.height * (root.level_anode / 100.0);
+                            background: #3b82f6; // 蓝色水
+                        }
+                    }
+                    Text { text: round(root.level_anode * 10) / 10 + " %"; color: #3b82f6; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
+                }
+
+                // 阴极罐
+                VerticalBox {
+                    spacing: 10px;
+                    alignment: center;
+                    Text { text: "阴极储液罐"; color: #ffffff; font-size: 16px; horizontal-alignment: center; }
+                    Rectangle {
+                        width: 120px; height: 300px;
+                        border-color: #555555; border-width: 3px; border-radius: 5px;
+                        // 动态液位填充
+                        Rectangle {
+                            y: parent.height - self.height;
+                            width: 100%;
+                            height: parent.height * (root.level_cathode / 100.0);
+                            background: #10b981; // 绿色水
+                        }
+                    }
+                    Text { text: round(root.level_cathode * 10) / 10 + " %"; color: #10b981; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
+                }
+            }
+
+            // 右侧：传感器数值大屏
+            Rectangle {
+                width: 300px;
+                border-color: #333333;
+                border-width: 2px;
+                border-radius: 8px;
+                background: #252526;
+                
+                VerticalBox {
+                    padding: 20px;
+                    spacing: 30px;
+                    alignment: center;
+
+                    VerticalBox {
+                        Text { text: "高压罐压力"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: round(root.pressure_mpa * 100) / 100 + " MPa"; font-size: 36px; color: #f59e0b; font-weight: 700; }
+                    }
+                    
+                    VerticalBox {
+                        Text { text: "阳极瞬时流量"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: round(root.flow_anode * 10) / 10 + " L/min"; font-size: 32px; color: #3b82f6; font-weight: 700; }
+                    }
+
+                    VerticalBox {
+                        Text { text: "阴极瞬时流量"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: round(root.flow_cathode * 10) / 10 + " L/min"; font-size: 32px; color: #10b981; font-weight: 700; }
+                    }
+                }
+            }
+        }
+    }
+}
