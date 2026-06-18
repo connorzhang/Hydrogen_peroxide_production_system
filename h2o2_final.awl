@@ -1,0 +1,524 @@
+ORGANIZATION_BLOCK OB1
+TITLE=Main Program
+BEGIN
+Network 1 
+// Initialize on first scan
+LD     SM0.1
+CALL   SBR_INIT
+
+Network 2 
+// Configure HSC0 on first scan (directly in OB1)
+LD     SM0.1
+MOVB   16#F8, SMB37
+MOVD   +0, SMD38
+MOVD   +0, SMD42
+HDEF   0, 0
+HSC    0
+
+Network 3 
+// Configure HSC4 on first scan
+LD     SM0.1
+MOVB   16#F8, SMB57
+MOVD   +0, SMD48
+MOVD   +0, SMD52
+HDEF   4, 0
+HSC    4
+
+Network 4 
+// Main loop - call subroutines
+LD     SM0.0
+CALL   SBR_ANALOG
+
+Network 5 
+LD     SM0.0
+CALL   SBR_FLOW
+
+Network 6 
+LD     SM0.0
+CALL   SBR_SEQ
+
+Network 7 
+LD     SM0.0
+CALL   SBR_LEVEL
+
+Network 8 
+// Emergency stop
+LD     I0.3
+ED
+O      V2302.2
+CALL   SBR_EMG
+R      V2302.2, 1
+
+Network 9 
+// Diagnostic CTU for I0.0 (verifies flow meter pulse)
+LD     I0.0
+LD     SM0.1
+CTU    C0, +9999
+
+Network 10 
+// Diagnostic CTU for I0.6 (verifies cathode flow meter pulse)
+LD     I0.6
+LD     SM0.1
+CTU    C1, +9999
+
+Network 11 
+// Store CTU values in VW for Python reading
+LD     SM0.0
+MOVW   C0, VW1360
+MOVW   C1, VW1362
+
+Network 12 
+LD     SM0.0
+MOVD   HC1, VD1404
+MOVD   HC2, VD1408
+MOVD   HC3, VD1412
+MOVD   HC4, VD1416
+MOVD   HC5, VD1420
+
+END_ORGANIZATION_BLOCK
+
+SUBROUTINE_BLOCK SBR_INIT:SBR0
+TITLE=Initialization
+BEGIN
+Network 1 
+// Set default parameters on first scan
+LD     SM0.1
+MOVR   100.0, VD2000   // Pressure target: 100kPa
+MOVR   10.0, VD2004    // Anode/Cathode pressure threshold: 10kPa
+MOVR   0.2, VD2008     // Pressure deadband: 0.2kPa
+MOVR   55.0, VD2012    // Startup level target: 55cm
+MOVR   221000.0, VD2016 // Anode flow meter coefficient
+MOVR   88400.0, VD2028  // Cathode flow meter coefficient
+MOVW   8294, VW2020    // Anode PWM duty: 3V on 0-10V module
+MOVW   5253, VW2026    // Cathode PWM duty: 1.9V on 0-10V module
+MOVW   6000, VW2022    // Shutdown delay: 10min (6000*100ms)
+MOVW   100, VW2024     // Cathode start delay: 10s (100*100ms), adjustable for debug
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_ANALOG:SBR1
+TITLE=Analog Processing
+BEGIN
+Network 1 
+// CH0: High pressure tank pressure (AIW16 -> VW1000 raw, VD2100 float kPa)
+LD     SM0.0
+ITD    AIW16, AC0
+MOVW   AIW16, VW1000
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     600.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2100
+Network 2 
+LD     SM0.0
+AR<    VD2100, 0.0
+MOVR   0.0, VD2100
+
+Network 3 
+// CH1: Anode pressure (AIW18 -> VW1002 raw, VD2104 float kPa)
+LD     SM0.0
+ITD    AIW18, AC0
+MOVW   AIW18, VW1002
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     600.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2104
+Network 4 
+LD     SM0.0
+AR<    VD2104, 0.0
+MOVR   0.0, VD2104
+
+Network 5 
+// CH2: Cathode pressure (AIW20 -> VW1004 raw, VD2108 float kPa)
+LD     SM0.0
+ITD    AIW20, AC0
+MOVW   AIW20, VW1004
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     600.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2108
+Network 6 
+LD     SM0.0
+AR<    VD2108, 0.0
+MOVR   0.0, VD2108
+
+Network 7 
+// CH3: Anode tank level (AIW22 -> VW1010 raw, VD2112 float cm, 0-200cm)
+LD     SM0.0
+ITD    AIW22, AC0
+MOVW   AIW22, VW1010
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     200.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2112
+Network 8 
+LD     SM0.0
+AR<    VD2112, 0.0
+MOVR   0.0, VD2112
+
+Network 9 
+// CH4: Cathode tank level (AIW24 -> VW1012 raw, VD2116 float cm, 0-200cm)
+LD     SM0.0
+ITD    AIW24, AC0
+MOVW   AIW24, VW1012
+DTR    AC0, AC0
+-R     5530.0, AC0
+*R     200.0, AC0
+/R     22118.0, AC0
+MOVR   AC0, VD2116
+Network 10 
+LD     SM0.0
+AR<    VD2116, 0.0
+MOVR   0.0, VD2116
+
+Network 11 
+// CH5-7: Reserved (AIW26-AIW30 -> VW1014-VW1018)
+LD     SM0.0
+ITD    AIW26, AC0
+MOVW   AIW26, VW1014
+ITD    AIW28, AC0
+MOVW   AIW28, VW1016
+ITD    AIW30, AC0
+MOVW   AIW30, VW1018
+
+Network 12 
+// Pressure达标 flag
+LD     SM0.0
+AR>    VD2100, VD2000
+=      V2303.0
+
+Network 13 
+// Anode low level alarm
+LD     SM0.0
+AR<    VD2112, 20.0
+=      V2303.1
+
+Network 14 
+// Cathode low level alarm
+LD     SM0.0
+AR<    VD2116, 20.0
+=      V2303.2
+
+Network 15 
+// Stop DC output on low level alarm
+LD     V2303.1
+O      V2303.2
+R      Q1.2, 1
+
+Network 16 
+// PWM output for anode pump
+LD     M1.0
+MOVW   VW2020, AQW32
+Network 17 
+LDN    M1.0
+MOVW   +0, AQW32
+
+Network 18 
+// PWM output for cathode pump
+LD     M1.1
+MOVW   VW2026, AQW34
+Network 19 
+LDN    M1.1
+MOVW   +0, AQW34
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_LEVEL:SBR5
+TITLE=Level Valve Control
+BEGIN
+Network 1 
+LD     SM0.0
+AB=    VB100, 10
+AR<    VD2112, 45.0
+S      Q0.0, 1
+
+Network 2 
+LD     SM0.0
+AB=    VB100, 20
+AR<    VD2112, 45.0
+S      Q0.0, 1
+
+Network 3 
+LD     SM0.0
+AB=    VB100, 30
+AR<    VD2112, 45.0
+S      Q0.0, 1
+
+Network 4 
+LD     SM0.0
+AB=    VB100, 10
+AR>=   VD2112, VD2012
+R      Q0.0, 1
+
+Network 5 
+LD     SM0.0
+AB=    VB100, 20
+AR>=   VD2112, VD2012
+R      Q0.0, 1
+
+Network 6 
+LD     SM0.0
+AB=    VB100, 30
+AR>=   VD2112, VD2012
+R      Q0.0, 1
+
+Network 7 
+LD     SM0.0
+AB=    VB100, 10
+AR<    VD2116, 45.0
+S      Q0.1, 1
+
+Network 8 
+LD     SM0.0
+AB=    VB100, 20
+AR<    VD2116, 45.0
+S      Q0.1, 1
+
+Network 9 
+LD     SM0.0
+AB=    VB100, 30
+AR<    VD2116, 45.0
+S      Q0.1, 1
+
+Network 10 
+LD     SM0.0
+AB=    VB100, 10
+AR>=   VD2116, VD2012
+R      Q0.1, 1
+
+Network 11 
+LD     SM0.0
+AB=    VB100, 20
+AR>=   VD2116, VD2012
+R      Q0.1, 1
+
+Network 12 
+LD     SM0.0
+AB=    VB100, 30
+AR>=   VD2116, VD2012
+R      Q0.1, 1
+
+Network 13 
+LD     SM0.0
+AB=    VB100, 0
+R      Q0.0, 2
+
+Network 14 
+LD     SM0.0
+AB=    VB101, 10
+R      Q0.0, 2
+
+Network 15 
+LD     SM0.0
+AB=    VB101, 20
+R      Q0.0, 2
+
+Network 16 
+LD     Q0.0
+O      Q0.1
+S      Q1.0, 1
+
+Network 17 
+LDN    Q0.0
+AN     Q0.1
+R      Q1.0, 1
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_FLOW:SBR2
+TITLE=Flow Calculation
+BEGIN
+Network 1 
+// 100ms timer for flow sampling
+LD     SM0.0
+AN     T42
+TON    T42, +100
+
+Network 2 
+// Flow meter 1 pulse calculation
+LD     T42
+MOVD   HC0, VD1200
+MOVD   VD1200, VD1208
+-D     VD1204, VD1208
+MOVD   VD1200, VD1204
+
+Network 3 
+// Flow meter 2 pulse calculation from I0.6 CTU diagnostic
+LD     T42
+ITD    C1, VD1220
+MOVD   VD1220, VD1228
+-D     VD1224, VD1228
+MOVD   VD1220, VD1224
+
+Network 4 
+// Flow rate calculation (L/min): VD1208=pulses/100ms, *600 gives pulses/min
+LD     SM0.0
+DTR    VD1208, AC0
+*R     600.0, AC0
+/R     VD2016, AC0
+MOVR   AC0, VD1310
+
+Network 5 
+LD     SM0.0
+DTR    VD1228, AC0
+*R     600.0, AC0
+/R     VD2028, AC0
+MOVR   AC0, VD1330
+
+Network 6 
+LD     SM0.0
+AR>=   VD1310, 0.5
+=      V2303.3
+
+Network 7 
+LD     SM0.0
+AR>=   VD1330, 0.05
+=      V2303.4
+
+Network 8 
+LD     SM0.0
+R      V2303.5, 1
+
+Network 9 
+LD     SM0.0
+AB=    VB100, 30
+AR<    VD1310, 0.5
+S      V2303.5, 1
+
+Network 10 
+LD     SM0.0
+AB=    VB100, 30
+AR<    VD1330, 0.05
+S      V2303.5, 1
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_SEQ:SBR3
+TITLE=Sequence Control
+BEGIN
+Network 1 
+// Start button trigger
+LD     V2302.0
+O      I0.1
+EU
+MOVB   10, VB100
+R      V2302.0, 1
+
+Network 2 
+// Stop button trigger
+LD     V2302.1
+O      I0.2
+EU
+MOVB   10, VB101
+R      V2302.1, 1
+
+Network 3 
+// Step 10: Start compressor, water machine is controlled by refill valves
+LD     SM0.0
+AB=    VB100, 10
+S      Q1.1, 1
+
+Network 4 
+// Step 20: Tanks above minimum level and pressure ready
+LD     SM0.0
+AB=    VB100, 10
+AR>=   VD2112, 45.0
+AR>=   VD2116, 45.0
+AR>=   VD2100, VD2000
+MOVB   20, VB100
+
+Network 5 
+// Step 20: Start anode valve and anode pump
+LD     SM0.0
+AB=    VB100, 20
+S      Q0.2, 1
+S      M1.0, 1
+R      Q0.3, 1
+R      M1.1, 1
+
+Network 6 
+// Step 20: Anode stabilization delay
+LD     SM0.0
+AB=    VB100, 20
+TON    T37, VW2024
+
+Network 7 
+// Step 30: Start cathode valve and cathode pump
+LD     T37
+S      Q0.3, 1
+S      M1.1, 1
+MOVB   30, VB100
+
+Network 8 
+// Step 30: Production running, enable DC only when both flow rates are ready
+LD     SM0.0
+AB=    VB100, 30
+A      V2303.3
+A      V2303.4
+AN     V2303.1
+AN     V2303.2
+S      Q1.2, 1
+
+Network 9 
+LD     V2303.5
+R      Q1.2, 1
+
+Network 10 
+// Shutdown step 10: Stop DC, water machine, cathode valve and cathode pump
+LD     SM0.0
+AB=    VB101, 10
+R      Q0.0, 2
+R      Q1.2, 1
+R      Q1.0, 1
+R      Q0.3, 1
+R      M1.1, 1
+S      M10.1, 1
+MOVB   20, VB101
+
+Network 11 
+// Shutdown step 20: Delay 10min before stopping anode side
+LD     SM0.0
+AB=    VB101, 20
+TON    T41, VW2022
+
+Network 12 
+// Shutdown step 30: Stop anode valve, anode pump and compressor
+LD     T41
+R      Q0.2, 1
+R      M1.0, 1
+R      Q1.1, 1
+R      M10.1, 1
+MOVB   0, VB100
+MOVB   0, VB101
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_EMG:SBR4
+TITLE=Emergency Stop
+BEGIN
+Network 1 
+// Emergency stop - stop all outputs
+LD     SM0.0
+R      Q0.0, 4
+R      Q1.0, 3
+R      M1.0, 2
+MOVB   0, VB100
+MOVB   0, VB101
+R      M10.1, 1
+
+Network 2 
+// Compressor manual on
+LD     V2302.3
+S      Q1.1, 1
+R      V2302.3, 1
+
+Network 3 
+// Compressor manual off
+LD     V2302.4
+R      Q1.1, 1
+R      V2302.4, 1
+
+END_SUBROUTINE_BLOCK
