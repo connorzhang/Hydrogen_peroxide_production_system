@@ -14,13 +14,29 @@ export component AppWindow inherits Window {
     in property <bool> q_valve_cathode: false;
     in property <bool> q_dc_power: false;
     in property <bool> sys_alarm: false;
+    in property <bool> plc_connected: false;
+    in property <bool> q_refill_anode: false;
+    in property <bool> q_refill_cathode: false;
+    in property <bool> pump_anode_enable: false;
+    in property <bool> pump_cathode_enable: false;
+    in property <bool> pressure_ready: false;
+    in property <bool> anode_low_level_alarm: false;
+    in property <bool> cathode_low_level_alarm: false;
+    in property <bool> anode_flow_ready: false;
+    in property <bool> cathode_flow_ready: false;
+    in property <bool> flow_alarm: false;
+    in property <string> sequence_text: "待机";
 
-    // 模拟量数据
-    in property <float> pressure_mpa: 0.0;
+    // 现场实时数据
+    in property <float> pressure_kpa: 0.0;
     in property <float> level_anode: 0.0;
     in property <float> level_cathode: 0.0;
+    in property <float> level_anode_ratio: 0.0;
+    in property <float> level_cathode_ratio: 0.0;
     in property <float> flow_anode: 0.0;
     in property <float> flow_cathode: 0.0;
+    in property <float> pump_anode_voltage: 0.0;
+    in property <float> pump_cathode_voltage: 0.0;
 
     VerticalBox {
         padding: 20px;
@@ -34,6 +50,12 @@ export component AppWindow inherits Window {
                 font-size: 28px;
                 font-weight: 700;
                 color: #e0e0e0;
+            }
+            Text {
+                text: root.plc_connected ? "PLC 已连接" : "PLC 断开";
+                font-size: 18px;
+                font-weight: 700;
+                color: root.plc_connected ? #00ff00 : #ff3333;
             }
         }
 
@@ -81,6 +103,26 @@ export component AppWindow inherits Window {
                     }
                     HorizontalBox {
                         spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_refill_anode ? #3b82f6 : #555555; }
+                        Text { text: "阳极补水阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_refill_cathode ? #10b981 : #555555; }
+                        Text { text: "阴极补水阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.pump_anode_enable ? #3b82f6 : #555555; }
+                        Text { text: "阳极泵"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
+                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.pump_cathode_enable ? #10b981 : #555555; }
+                        Text { text: "阴极泵"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
+                    }
+                    HorizontalBox {
+                        spacing: 15px;
                         Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.sys_alarm ? #ff0000 : #555555; }
                         Text { text: "系统综合报警"; color: root.sys_alarm ? #ff0000 : #ffffff; font-size: 16px; font-weight: root.sys_alarm ? 700 : 400; vertical-alignment: center; }
                     }
@@ -104,11 +146,11 @@ export component AppWindow inherits Window {
                         Rectangle {
                             y: parent.height - self.height;
                             width: 100%;
-                            height: parent.height * (root.level_anode / 100.0);
+                            height: parent.height * root.level_anode_ratio;
                             background: #3b82f6; // 蓝色水
                         }
                     }
-                    Text { text: round(root.level_anode * 10) / 10 + " %"; color: #3b82f6; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
+                    Text { text: round(root.level_anode * 10) / 10 + " cm"; color: #3b82f6; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
                 }
 
                 // 阴极罐
@@ -123,11 +165,11 @@ export component AppWindow inherits Window {
                         Rectangle {
                             y: parent.height - self.height;
                             width: 100%;
-                            height: parent.height * (root.level_cathode / 100.0);
+                            height: parent.height * root.level_cathode_ratio;
                             background: #10b981; // 绿色水
                         }
                     }
-                    Text { text: round(root.level_cathode * 10) / 10 + " %"; color: #10b981; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
+                    Text { text: round(root.level_cathode * 10) / 10 + " cm"; color: #10b981; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
                 }
             }
 
@@ -141,22 +183,41 @@ export component AppWindow inherits Window {
                 
                 VerticalBox {
                     padding: 20px;
-                    spacing: 30px;
+                    spacing: 18px;
                     alignment: center;
 
                     VerticalBox {
+                        Text { text: "当前流程"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: root.sequence_text; font-size: 28px; color: #38bdf8; font-weight: 700; }
+                    }
+
+                    VerticalBox {
                         Text { text: "高压罐压力"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.pressure_mpa * 100) / 100 + " MPa"; font-size: 36px; color: #f59e0b; font-weight: 700; }
+                        Text { text: round(root.pressure_kpa * 10) / 10 + " kPa"; font-size: 36px; color: #f59e0b; font-weight: 700; }
                     }
                     
                     VerticalBox {
                         Text { text: "阳极瞬时流量"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.flow_anode * 10) / 10 + " L/min"; font-size: 32px; color: #3b82f6; font-weight: 700; }
+                        Text { text: round(root.flow_anode * 1000) / 1000 + " L/min"; font-size: 32px; color: #3b82f6; font-weight: 700; }
                     }
 
                     VerticalBox {
                         Text { text: "阴极瞬时流量"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.flow_cathode * 10) / 10 + " L/min"; font-size: 32px; color: #10b981; font-weight: 700; }
+                        Text { text: round(root.flow_cathode * 1000) / 1000 + " L/min"; font-size: 32px; color: #10b981; font-weight: 700; }
+                    }
+
+                    VerticalBox {
+                        Text { text: "泵输出电压"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: "阳极 " + round(root.pump_anode_voltage * 100) / 100 + "V / 阴极 " + round(root.pump_cathode_voltage * 100) / 100 + "V"; font-size: 18px; color: #e0e0e0; font-weight: 700; }
+                    }
+
+                    VerticalBox {
+                        Text { text: "联锁状态"; font-size: 16px; color: #aaaaaa; }
+                        Text { text: root.pressure_ready ? "压力达标" : "压力未达标"; font-size: 16px; color: root.pressure_ready ? #00ff00 : #f59e0b; }
+                        Text { text: root.anode_flow_ready ? "阳极流量达标" : "阳极流量未达标"; font-size: 16px; color: root.anode_flow_ready ? #00ff00 : #f59e0b; }
+                        Text { text: root.cathode_flow_ready ? "阴极流量达标" : "阴极流量未达标"; font-size: 16px; color: root.cathode_flow_ready ? #00ff00 : #f59e0b; }
+                        Text { text: root.flow_alarm ? "生产缺流报警" : "生产流量正常"; font-size: 16px; color: root.flow_alarm ? #ff3333 : #00ff00; }
+                        Text { text: (root.anode_low_level_alarm || root.cathode_low_level_alarm) ? "低液位报警" : "液位正常"; font-size: 16px; color: (root.anode_low_level_alarm || root.cathode_low_level_alarm) ? #ff3333 : #00ff00; }
                     }
                 }
             }
