@@ -246,8 +246,6 @@ fn read_plc_data(client: &mut S7Client) -> Result<PlcData, Box<dyn std::error::E
 }
 
 fn apply_plc_data(ui: &AppWindow, data: PlcData) {
-    ui.set_plc_connected(data.connected);
-
     if !data.connected {
         ui.set_q_water_maker(false);
         ui.set_q_air_compressor(false);
@@ -263,43 +261,12 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
     ui.set_q_water_maker(data.q_water_maker);
     ui.set_q_air_compressor(data.q_air_compressor);
     ui.set_q_dc_power(data.q_dc_power);
-    ui.set_q_refill_anode(data.q_refill_anode);
-    ui.set_q_refill_cathode(data.q_refill_cathode);
-    ui.set_pump_anode_enable(data.pump_anode_enable);
-    ui.set_pump_cathode_enable(data.pump_cathode_enable);
-    ui.set_pressure_ready(data.pressure_ready);
-    ui.set_anode_low_level_alarm(data.anode_low_level_alarm);
-    ui.set_cathode_low_level_alarm(data.cathode_low_level_alarm);
-    ui.set_anode_flow_ready(data.anode_flow_ready);
-    ui.set_cathode_flow_ready(data.cathode_flow_ready);
-    ui.set_flow_alarm(data.flow_alarm);
-    ui.set_pressure_kpa(data.pressure_kpa);
+    ui.set_pressure_mpa(data.pressure_kpa / 1000.0);
     ui.set_level_anode(data.level_anode);
     ui.set_level_cathode(data.level_cathode);
-    ui.set_level_anode_ratio((data.level_anode / 60.0).clamp(0.0, 1.0));
-    ui.set_level_cathode_ratio((data.level_cathode / 60.0).clamp(0.0, 1.0));
     ui.set_flow_anode(data.flow_anode);
     ui.set_flow_cathode(data.flow_cathode);
-    ui.set_sequence_text(sequence_text(data.sequence_startup, data.sequence_shutdown).into());
-    ui.set_pump_anode_voltage(data.aqw32 as f32 / 27648.0 * 10.0);
-    ui.set_pump_cathode_voltage(data.aqw34 as f32 / 27648.0 * 10.0);
     ui.set_sys_alarm(data.sys_alarm);
-}
-
-fn sequence_text(startup: u8, shutdown: u8) -> &'static str {
-    if shutdown == 10 {
-        return "关机：停止直流/阴极";
-    }
-    if shutdown == 20 {
-        return "关机：阳极延时";
-    }
-    match startup {
-        0 => "待机",
-        10 => "补水升压",
-        20 => "阳极运行",
-        30 => "阴阳极运行",
-        _ => "未知步骤",
-    }
 }
 
 #[tokio::main]
@@ -335,7 +302,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             let ui_handle_clone = ui_handle.clone();
                             let _ = slint::invoke_from_event_loop(move || {
                                 if let Some(ui) = ui_handle_clone.upgrade() {
-                                    ui.set_plc_connected(false);
                                     ui.set_sys_alarm(true);
                                 }
                             });
@@ -354,7 +320,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let ui_handle_clone = ui_handle.clone();
                     let _ = slint::invoke_from_event_loop(move || {
                         if let Some(ui) = ui_handle_clone.upgrade() {
-                            ui.set_plc_connected(false);
                             ui.set_sys_alarm(true);
                         }
                     });
