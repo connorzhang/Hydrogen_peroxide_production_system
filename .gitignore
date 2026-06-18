@@ -1,4 +1,5 @@
 .env
 h2o2_monitor/.env
 temp_scripts/
+__pycache__/
 
