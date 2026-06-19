@@ -2,4 +2,13 @@
 h2o2_monitor/.env
 temp_scripts/
 __pycache__/
+target/
+**/target/
+.cargo_tmp*/
+**/.cargo/
+*.log
+*.tmp
+*.err
+*.rar
+.vscode/
 

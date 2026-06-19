@@ -1,164 +1,202 @@
-import { VerticalBox, HorizontalBox, GridBox } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+// --- 动画状态全局单例 ---
+global AnimState {
+    in-out property <float> tick: 0;
+}
+
+// 覆盖设备的图片组件 (用于状态变暗)
+component DeviceOverlay inherits Image {
+    in property <bool> active: true;
+    width: 100%;
+    height: 100%;
+    opacity: 1.0;
+    colorize: active ? transparent : #000000b0;
+}
+
+// --- 核心流动效果组件 ---
+component FlowPipe inherits Rectangle {
+    in property <bool> active: false;
+    in property <color> theme_color: #38bdf8;
+    in property <bool> vertical: false;
+    in property <bool> reverse: false; // 水平: true为向左流; 垂直: true为向上流
+
+    clip: true;
+    background: transparent;
+    // 增加全局透明度，让底图管道的金属高光透过来，模拟"在管内"的错觉
+    opacity: 0.65; // 调低透明度，使流动图更清透，与底图融合更完美
+
+    Rectangle {
+        width: vertical ? parent.width : parent.width + 60px;
+        height: vertical ? parent.height + 60px : parent.height;
+        x: !vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-30px + AnimState.tick * 2px)) : -30px) : 0;
+        y: vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-30px + AnimState.tick * 2px)) : -30px) : 0;
+
+        HorizontalLayout {
+            if !vertical : HorizontalLayout {
+                spacing: 18px;
+                for i in 50: Rectangle {
+                    width: 14px; height: parent.height;
+                    background: active ? theme_color : transparent;
+                    border-radius: parent.height/2;
+                    drop-shadow-blur: 8px; drop-shadow-color: theme_color;
+                }
+            }
+        }
+        VerticalLayout {
+            if vertical : VerticalLayout {
+                spacing: 18px;
+                for i in 50: Rectangle {
+                    height: 14px; width: parent.width;
+                    background: active ? theme_color : transparent;
+                    border-radius: parent.width/2;
+                    drop-shadow-blur: 8px; drop-shadow-color: theme_color;
+                }
+            }
+        }
+    }
+}
 
 export component AppWindow inherits Window {
-    title: "双氧水生产系统 - 工作状态监控";
-    width: 1024px;
-    height: 600px;
-    background: #1e1e1e;
+    title: "双氧水工艺流程 - 组态监控系统";
+    // 设置全屏和无边框
+    width: 1280px;
+    height: 1024px;
+    no-frame: true;
+    background: #020617;
 
-    // --- 与 Rust 后端绑定的数据属性 ---
-    // 状态标志
-    in property <bool> q_water_maker: false;
-    in property <bool> q_air_compressor: false;
-    in property <bool> q_valve_anode: false;
-    in property <bool> q_valve_cathode: false;
-    in property <bool> q_dc_power: false;
+    // 添加退出程序的回调
+    callback request_exit();
+    
+    // 窗口拖拽回调
+    callback window_drag_start(length, length);
+    callback window_drag_update(length, length);
+
+    // 最底层的全局拖拽区域
+    TouchArea {
+        width: 100%; height: 100%;
+        z: -1; // 保持在最底层，不影响上面按钮的点击
+        pointer-event(evt) => {
+            if (evt.button == PointerEventButton.left && evt.kind == PointerEventKind.down) {
+                root.window_drag_start(self.mouse-x, self.mouse-y);
+            }
+        }
+        moved => {
+            root.window_drag_update(self.mouse-x, self.mouse-y);
+        }
+    }
+
+    in property <bool> q_water_maker: true;
+    in property <bool> q_air_compressor: true;
+    in property <bool> q_valve_anode: true;
+    in property <bool> q_valve_cathode: true;
+    in property <bool> q_dc_power: true;
     in property <bool> sys_alarm: false;
 
-    // 模拟量数据
+    in property <bool> flow_pure_to_cathode: false;
+    in property <bool> flow_cathode_valve_to_corner: false;
+    in property <bool> flow_cathode_vertical: false;
+    in property <bool> flow_cathode_top: false;
+    in property <bool> flow_pure_to_anode_cell: false;
+    in property <bool> flow_anode_cell_to_valve: false;
+    in property <bool> flow_anode_valve_to_corner: false;
+    in property <bool> flow_anode_vertical: false;
+    in property <bool> flow_anode_upper: false;
+    in property <bool> flow_air_compressor: false;
+
     in property <float> pressure_mpa: 0.0;
+    in property <float> pressure_anode: 0.0;
+    in property <float> pressure_cathode: 0.0;
     in property <float> level_anode: 0.0;
     in property <float> level_cathode: 0.0;
     in property <float> flow_anode: 0.0;
     in property <float> flow_cathode: 0.0;
 
-    VerticalBox {
-        padding: 20px;
-        spacing: 20px;
-
-        // 标题栏
-        HorizontalBox {
-            alignment: center;
-            Text {
-                text: "双氧水生产系统实时监控";
-                font-size: 28px;
-                font-weight: 700;
-                color: #e0e0e0;
+    // 动画驱动定时器
+    Timer {
+        interval: 30ms;
+        running: true;
+        triggered => {
+            AnimState.tick = AnimState.tick + 1;
+            if (AnimState.tick >= 15) {
+                AnimState.tick = 0;
             }
         }
+    }
 
-        // 主内容区
-        HorizontalBox {
-            spacing: 40px;
+    Rectangle {
+        // 保证底图和坐标系统的宽高比永远和原图 4838:3871 (1.2498) 保持一致
+        width: min(root.width, root.height * 1.2498);
+        height: min(root.height, root.width / 1.2498);
+        x: (root.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
+        
+        // 1. 底图 (包含所有静态文本和背景)
+        Image { source: @image-url("../../PNG/整体效果.png"); width: 100%; height: 100%; }
 
-            // 左侧：设备运行状态灯
-            Rectangle {
-                width: 250px;
-                border-color: #333333;
-                border-width: 2px;
-                border-radius: 8px;
-                background: #252526;
-                
-                VerticalBox {
-                    padding: 20px;
-                    spacing: 15px;
-                    Text { text: "设备运行状态"; font-size: 18px; color: #aaaaaa; }
-                    
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_water_maker ? #00ff00 : #555555; }
-                        Text { text: "纯水机组"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
-                    }
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_air_compressor ? #00ff00 : #555555; }
-                        Text { text: "空压机组"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
-                    }
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_valve_anode ? #00ff00 : #555555; }
-                        Text { text: "阳极电磁阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
-                    }
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_valve_cathode ? #00ff00 : #555555; }
-                        Text { text: "阴极电磁阀"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
-                    }
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.q_dc_power ? #ff3333 : #555555; }
-                        Text { text: "直流电源 (危险)"; color: #ffffff; font-size: 16px; vertical-alignment: center; }
-                    }
-                    HorizontalBox {
-                        spacing: 15px;
-                        Rectangle { width: 20px; height: 20px; border-radius: 10px; background: root.sys_alarm ? #ff0000 : #555555; }
-                        Text { text: "系统综合报警"; color: root.sys_alarm ? #ff0000 : #ffffff; font-size: 16px; font-weight: root.sys_alarm ? 700 : 400; vertical-alignment: center; }
-                    }
-                }
+        // 3. 跑马灯流动管线 (精准匹配底图像素坐标)
+        // 阴极侧 (蓝色)
+        // 纯水机到阴极阀
+        FlowPipe { x: parent.width * 0.310; y: parent.height * 0.706; width: 19.0%; height: 1.2%; theme_color: #38bdf8; active: root.flow_pure_to_cathode; reverse: true; }
+        // 阴极阀到左下转角
+        FlowPipe { x: parent.width * 0.188; y: parent.height * 0.706; width: 12.2%; height: 1.2%; theme_color: #38bdf8; active: root.flow_cathode_valve_to_corner; reverse: true; }
+        // 左垂直管道
+        FlowPipe { x: parent.width * 0.188; y: parent.height * 0.326; width: 1.0%; height: 39.2%; theme_color: #38bdf8; vertical: true; active: root.flow_cathode_vertical; reverse: true; }
+        // 左上角到顶部设备
+        FlowPipe { x: parent.width * 0.188; y: parent.height * 0.330; width: 19.0%; height: 1.2%; theme_color: #38bdf8; active: root.flow_cathode_top; reverse: false; }
+
+        // 阳极侧 (橙色与青色混合)
+        // 纯水机到电解槽 (Cyan)
+        FlowPipe { x: parent.width * 0.500; y: parent.height * 0.706; width: 11.3%; height: 1.2%; theme_color: #38bdf8; active: root.flow_pure_to_anode_cell; reverse: false; }
+        // 电解槽到阳极阀 (橙色)
+        FlowPipe { x: parent.width * 0.613; y: parent.height * 0.706; width: 3.7%; height: 1.2%; theme_color: #f97316; active: root.flow_anode_cell_to_valve; reverse: false; }
+        // 阳极阀到右下角 (橙色)
+        FlowPipe { x: parent.width * 0.650; y: parent.height * 0.706; width: 16.0%; height: 1.2%; theme_color: #f97316; active: root.flow_anode_valve_to_corner; reverse: false; }
+        // 右下角到右上角 (垂直 橙色)
+        FlowPipe { x: parent.width * 0.800; y: parent.height * 0.454; width: 1.0%; height: 26.4%; theme_color: #f97316; vertical: true; active: root.flow_anode_vertical; reverse: true; }
+        // 右上角到中间设备 (水平中 橙色)
+        FlowPipe { x: parent.width * 0.613; y: parent.height * 0.454; width: 19.7%; height: 1.2%; theme_color: #f97316; active: root.flow_anode_upper; reverse: true; }
+
+        // 压缩机侧 (蓝色)
+        FlowPipe { x: parent.width * 0.628; y: parent.height * 0.330; width: 20.3%; height: 1.2%; theme_color: #38bdf8; active: root.flow_air_compressor; reverse: false; }
+
+        // 4. 设备状态覆盖层 (通过变暗来表示停止状态)
+        DeviceOverlay { source: @image-url("../../PNG/纯水机.png"); active: root.q_water_maker; }
+        DeviceOverlay { source: @image-url("../../PNG/压缩机.png"); active: root.q_air_compressor; }
+        DeviceOverlay { source: @image-url("../../PNG/阳极泵.png"); active: root.q_valve_anode; }
+        DeviceOverlay { source: @image-url("../../PNG/阳极阀.png"); active: root.q_valve_anode; }
+        DeviceOverlay { source: @image-url("../../PNG/阴极泵.png"); active: root.q_valve_cathode; }
+        DeviceOverlay { source: @image-url("../../PNG/阴极阀.png"); active: root.q_valve_cathode; }
+        
+        // 5. 数据数值层 (统一转换为百分比定位)
+        Text { x: parent.width * 0.2343; y: parent.height * 0.1900; text: round(root.pressure_cathode * 100)/100 + " kPa"; color: #38bdf8; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.1015; y: parent.height * 0.5500; text: round(root.flow_cathode * 10)/10 + " ml/m"; color: #38bdf8; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.1250; y: parent.height * 0.8100; text: root.q_valve_cathode ? "100 %" : "0 %"; color: #38bdf8; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.3125; y: parent.height * 0.8400; text: round(root.level_cathode * 10)/10 + " cm"; color: #38bdf8; font-size: 20px; font-weight: 800; }
+        
+        Text { x: parent.width * 0.8281; y: parent.height * 0.8100; text: root.q_valve_anode ? "100 %" : "0 %"; color: #f97316; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.8281; y: parent.height * 0.5500; text: round(root.flow_anode * 10)/10 + " ml/m"; color: #f97316; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.6562; y: parent.height * 0.8400; text: round(root.level_anode * 10)/10 + " cm"; color: #f97316; font-size: 20px; font-weight: 800; }
+        Text { x: parent.width * 0.7187; y: parent.height * 0.3600; text: round(root.pressure_anode * 100)/100 + " kPa"; color: #f97316; font-size: 20px; font-weight: 800; }
+        
+        Text { x: parent.width * 0.7187; y: parent.height * 0.1900; text: round(root.pressure_mpa * 100)/100 + " kPa"; color: #a855f7; font-size: 20px; font-weight: 800; }
+        
+        Rectangle {
+            x: parent.width * 0.4000; y: parent.height * 0.9000;
+            width: parent.width * 0.2000; height: parent.height * 0.1000;
+            background: transparent;
+
+            Text {
+                width: 100%; height: 100%;
+                horizontal-alignment: center; vertical-alignment: center;
+                text: root.sys_alarm ? "系统故障/报警" : "系统正常运行";
+                color: root.sys_alarm ? #ef4444 : #10b981;
+                font-size: 24px; font-weight: 800;
             }
 
-            // 中间：双液位储罐
-            HorizontalBox {
-                spacing: 60px;
-                alignment: center;
-
-                // 阳极罐
-                VerticalBox {
-                    spacing: 10px;
-                    alignment: center;
-                    Text { text: "阳极储液罐"; color: #ffffff; font-size: 16px; horizontal-alignment: center; }
-                    Rectangle {
-                        width: 120px; height: 300px;
-                        border-color: #555555; border-width: 3px; border-radius: 5px;
-                        // 动态液位填充
-                        Rectangle {
-                            y: parent.height - self.height;
-                            width: 100%;
-                            height: parent.height * (root.level_anode / 100.0);
-                            background: #3b82f6; // 蓝色水
-                        }
-                    }
-                    Text { text: round(root.level_anode * 10) / 10 + " %"; color: #3b82f6; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
-                }
-
-                // 阴极罐
-                VerticalBox {
-                    spacing: 10px;
-                    alignment: center;
-                    Text { text: "阴极储液罐"; color: #ffffff; font-size: 16px; horizontal-alignment: center; }
-                    Rectangle {
-                        width: 120px; height: 300px;
-                        border-color: #555555; border-width: 3px; border-radius: 5px;
-                        // 动态液位填充
-                        Rectangle {
-                            y: parent.height - self.height;
-                            width: 100%;
-                            height: parent.height * (root.level_cathode / 100.0);
-                            background: #10b981; // 绿色水
-                        }
-                    }
-                    Text { text: round(root.level_cathode * 10) / 10 + " %"; color: #10b981; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
-                }
-            }
-
-            // 右侧：传感器数值大屏
-            Rectangle {
-                width: 300px;
-                border-color: #333333;
-                border-width: 2px;
-                border-radius: 8px;
-                background: #252526;
-                
-                VerticalBox {
-                    padding: 20px;
-                    spacing: 30px;
-                    alignment: center;
-
-                    VerticalBox {
-                        Text { text: "高压罐压力"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.pressure_mpa * 100) / 100 + " MPa"; font-size: 36px; color: #f59e0b; font-weight: 700; }
-                    }
-                    
-                    VerticalBox {
-                        Text { text: "阳极瞬时流量"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.flow_anode * 10) / 10 + " L/min"; font-size: 32px; color: #3b82f6; font-weight: 700; }
-                    }
-
-                    VerticalBox {
-                        Text { text: "阴极瞬时流量"; font-size: 16px; color: #aaaaaa; }
-                        Text { text: round(root.flow_cathode * 10) / 10 + " L/min"; font-size: 32px; color: #10b981; font-weight: 700; }
-                    }
-                }
+            TouchArea {
+                width: 100%; height: 100%;
+                clicked => { root.request_exit(); }
             }
         }
     }

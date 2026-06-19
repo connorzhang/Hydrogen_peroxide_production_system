@@ -1,9 +1,11 @@
+#![windows_subsystem = "windows"]
 slint::include_modules!();
 
 use std::io::{Read, Write};
 use std::net::TcpStream;
-use std::sync::{Arc, RwLock};
-use std::time::Duration;
+use std::cell::Cell;
+use std::rc::Rc;
+use std::time::{Duration, Instant};
 use tokio::time::sleep;
 
 const AREA_PE: u8 = 0x81;
@@ -252,30 +254,111 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
         ui.set_q_valve_anode(false);
         ui.set_q_valve_cathode(false);
         ui.set_q_dc_power(false);
+        set_all_flows(ui, false);
         ui.set_sys_alarm(true);
         return;
     }
+
+    let system_running = !data.sys_alarm && !data.i_emergency;
+    let cathode_running = system_running && data.q_valve_cathode;
+    let anode_running = system_running && data.q_valve_anode;
+    let water_running = system_running && data.q_water_maker;
+    let air_running = system_running && data.q_air_compressor;
 
     ui.set_q_valve_anode(data.q_valve_anode);
     ui.set_q_valve_cathode(data.q_valve_cathode);
     ui.set_q_water_maker(data.q_water_maker);
     ui.set_q_air_compressor(data.q_air_compressor);
     ui.set_q_dc_power(data.q_dc_power);
-    ui.set_pressure_mpa(data.pressure_kpa / 1000.0);
+    ui.set_pressure_mpa(data.pressure_kpa);
+    ui.set_pressure_anode(data.pressure_anode);
+    ui.set_pressure_cathode(data.pressure_cathode);
     ui.set_level_anode(data.level_anode);
     ui.set_level_cathode(data.level_cathode);
     ui.set_flow_anode(data.flow_anode);
     ui.set_flow_cathode(data.flow_cathode);
     ui.set_sys_alarm(data.sys_alarm);
+    ui.set_flow_pure_to_cathode(water_running && cathode_running);
+    ui.set_flow_cathode_valve_to_corner(cathode_running);
+    ui.set_flow_cathode_vertical(cathode_running);
+    ui.set_flow_cathode_top(cathode_running);
+    ui.set_flow_pure_to_anode_cell(water_running && anode_running);
+    ui.set_flow_anode_cell_to_valve(anode_running);
+    ui.set_flow_anode_valve_to_corner(anode_running);
+    ui.set_flow_anode_vertical(anode_running);
+    ui.set_flow_anode_upper(anode_running);
+    ui.set_flow_air_compressor(air_running);
+}
+
+fn set_all_flows(ui: &AppWindow, active: bool) {
+    ui.set_flow_pure_to_cathode(active);
+    ui.set_flow_cathode_valve_to_corner(active);
+    ui.set_flow_cathode_vertical(active);
+    ui.set_flow_cathode_top(active);
+    ui.set_flow_pure_to_anode_cell(active);
+    ui.set_flow_anode_cell_to_valve(active);
+    ui.set_flow_anode_valve_to_corner(active);
+    ui.set_flow_anode_vertical(active);
+    ui.set_flow_anode_upper(active);
+    ui.set_flow_air_compressor(active);
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::env::set_var("RUST_LOG", "error");
+    std::env::set_var("SLINT_FONT_FALLBACK", "none");
+
     let ui = AppWindow::new()?;
+    ui.window().set_position(slint::PhysicalPosition::new(0, 0));
     let ui_handle = ui.as_weak();
     let plc_addr = std::env::var("H2O2_PLC_ADDR").unwrap_or_else(|_| "192.168.1.11:102".to_string());
-    let latest_data = Arc::new(RwLock::new(PlcData::default()));
-    let collector_data = latest_data.clone();
+
+    let click_count = Rc::new(Cell::new(0));
+    let last_click = Rc::new(Cell::new(Instant::now()));
+
+    ui.on_request_exit({
+        let click_count = click_count.clone();
+        let last_click = last_click.clone();
+        move || {
+            let now = Instant::now();
+            if now.duration_since(last_click.get()) < Duration::from_millis(500) {
+                click_count.set(click_count.get() + 1);
+            } else {
+                click_count.set(1);
+            }
+            last_click.set(now);
+
+            if click_count.get() >= 3 {
+                std::process::exit(0);
+            }
+        }
+    });
+
+    let drag_start_x = Rc::new(Cell::new(0.0));
+    let drag_start_y = Rc::new(Cell::new(0.0));
+
+    ui.on_window_drag_start({
+        let drag_start_x = drag_start_x.clone();
+        let drag_start_y = drag_start_y.clone();
+        move |x, y| {
+            drag_start_x.set(x);
+            drag_start_y.set(y);
+        }
+    });
+
+    ui.on_window_drag_update({
+        let ui_handle_drag = ui_handle.clone();
+        let drag_start_x = drag_start_x.clone();
+        let drag_start_y = drag_start_y.clone();
+        move |x, y| {
+            if let Some(ui) = ui_handle_drag.upgrade() {
+                let pos = ui.window().position();
+                let new_x = pos.x + x as i32 - drag_start_x.get() as i32;
+                let new_y = pos.y + y as i32 - drag_start_y.get() as i32;
+                ui.window().set_position(slint::PhysicalPosition::new(new_x, new_y));
+            }
+        }
+    });
 
     tokio::spawn(async move {
         loop {
@@ -283,9 +366,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(mut client) => loop {
                     match read_plc_data(&mut client) {
                         Ok(data) => {
-                            if let Ok(mut latest) = collector_data.write() {
-                                *latest = data;
-                            }
                             let ui_handle_clone = ui_handle.clone();
                             let _ = slint::invoke_from_event_loop(move || {
                                 if let Some(ui) = ui_handle_clone.upgrade() {
@@ -293,16 +373,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 }
                             });
                         }
-                        Err(error) => {
-                            eprintln!("PLC read failed: {}", error);
-                            if let Ok(mut latest) = collector_data.write() {
-                                latest.connected = false;
-                                latest.sys_alarm = true;
-                            }
+                        Err(_) => {
                             let ui_handle_clone = ui_handle.clone();
                             let _ = slint::invoke_from_event_loop(move || {
                                 if let Some(ui) = ui_handle_clone.upgrade() {
-                                    ui.set_sys_alarm(true);
+                                    apply_plc_data(&ui, PlcData { connected: false, ..PlcData::default() });
                                 }
                             });
                             break;
@@ -311,16 +386,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     sleep(Duration::from_millis(500)).await;
                 },
-                Err(error) => {
-                    eprintln!("PLC connect failed: {}", error);
-                    if let Ok(mut latest) = collector_data.write() {
-                        latest.connected = false;
-                        latest.sys_alarm = true;
-                    }
+                Err(_) => {
                     let ui_handle_clone = ui_handle.clone();
                     let _ = slint::invoke_from_event_loop(move || {
                         if let Some(ui) = ui_handle_clone.upgrade() {
-                            ui.set_sys_alarm(true);
+                            apply_plc_data(&ui, PlcData { connected: false, ..PlcData::default() });
                         }
                     });
                     sleep(Duration::from_secs(3)).await;
