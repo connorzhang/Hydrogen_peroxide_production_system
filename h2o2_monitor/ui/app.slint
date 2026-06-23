@@ -25,7 +25,7 @@ component DeviceOverlay inherits Rectangle {
         source: root.source;
         width: 100%;
         height: 100%;
-        colorize: #000000b0;
+        colorize: #00000080; // 降低黑度，避免完全看不见
         visible: !root.active;
     }
 }
@@ -180,9 +180,18 @@ export component AppWindow inherits Window {
 
         // 4. 设备与管道覆盖层 (静态组件叠加)
         Image { source: @image-url("../../PNG_1280/管道流露.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/纯水机.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/压缩机.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阳极泵.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阳极阀.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阳极流量.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阳极液位.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极压力高压罐压力.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阳极压力.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阴极泵.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阳极补水阀.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阴极阀.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/阴极补水阀.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极流量.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极液位.png"); width: 100%; height: 100%; }
 
@@ -193,12 +202,13 @@ export component AppWindow inherits Window {
         DeviceOverlay { source: @image-url("../../PNG_1280/阳极阀.png"); active: root.q_valve_anode; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阴极泵.png"); active: root.q_valve_cathode; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阴极阀.png"); active: root.q_valve_cathode; }
+        DeviceOverlay { source: @image-url("../../PNG_1280/阴极补水阀.png"); active: root.q_valve_cathode; }
+        DeviceOverlay { source: @image-url("../../PNG_1280/阳极补水阀.png"); active: root.q_valve_anode; }
         
         // 5. 数据数值与静态标签层
         // 产品/反应堆相关标签
-        Text { x: parent.width * 0.230; y: parent.height * 0.440; text: "产品"; color: #e2e8f0; font-size: 16px; font-weight: 700; }
+        Text { x: parent.width * 0.230; y: parent.height * 0.440; text: "双氧水"; color: #e2e8f0; font-size: 16px; font-weight: 700; }
         Text { x: parent.width * 0.470; y: parent.height * 0.540; text: "电解槽"; color: #e2e8f0; font-size: 18px; font-weight: 700; }
-        Text { x: parent.width * 0.055; y: parent.height * 0.670; text: "双氧水"; color: #e2e8f0; font-size: 16px; font-weight: 700; }
         
         // 压缩机标签
         Text { x: parent.width * 0.860; y: parent.height * 0.220; text: "压缩机"; color: #e2e8f0; font-size: 16px; font-weight: 700; }
