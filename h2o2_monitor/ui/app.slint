@@ -43,10 +43,10 @@ component FlowPipe inherits Rectangle {
     opacity: 0.65; // 调低透明度，使流动图更清透，与底图融合更完美
 
     Rectangle {
-        width: vertical ? parent.width : parent.width + 60px;
-        height: vertical ? parent.height + 60px : parent.height;
-        x: !vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-30px + AnimState.tick * 2px)) : -30px) : 0;
-        y: vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-30px + AnimState.tick * 2px)) : -30px) : 0;
+        width: vertical ? parent.width : parent.width + 100px;
+        height: vertical ? parent.height + 100px : parent.height;
+        x: !vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-48px + AnimState.tick * 2px)) : -48px) : 0;
+        y: vertical ? (active ? (reverse ? (0px - AnimState.tick * 2px) : (-48px + AnimState.tick * 2px)) : -48px) : 0;
 
         HorizontalLayout {
             if !vertical : HorizontalLayout {
@@ -132,11 +132,11 @@ export component AppWindow inherits Window {
 
     // 动画驱动定时器
     Timer {
-        interval: 60ms;
+        interval: 40ms;
         running: true;
         triggered => {
             AnimState.tick = AnimState.tick + 1;
-            if (AnimState.tick >= 15) {
+            if (AnimState.tick >= 24) {
                 AnimState.tick = 0;
             }
         }
