@@ -9,24 +9,27 @@ global AnimState {
 component DeviceOverlay inherits Rectangle {
     in property <bool> active: true;
     in property <image> source;
+    in property <color> tint_color: Colors.transparent;
+
     width: 100%;
     height: 100%;
-    background: transparent;
+    background: Colors.transparent;
 
-    // 1. 永远绘制原本的正常彩色图像
     Image {
         source: root.source;
         width: 100%;
         height: 100%;
+        opacity: root.active ? 1.0 : 0.3; // 停机时降低透明度变暗，保留完美材质
     }
-    
-    // 2. 停机时，在上方叠加一层与原图形状完全相同的黑色半透明遮罩
+
+    // 运行时的发光/染色效果 (不破坏原图材质)
     Image {
         source: root.source;
         width: 100%;
         height: 100%;
-        colorize: #00000080; // 降低黑度，避免完全看不见
-        visible: !root.active;
+        colorize: root.tint_color;
+        opacity: 0.4;
+        visible: root.active && root.tint_color != Colors.transparent;
     }
 }
 
@@ -189,7 +192,7 @@ export component AppWindow inherits Window {
         Image { source: @image-url("../../PNG_1280/阴极液位.png"); width: 100%; height: 100%; }
 
         // 设备状态覆盖层 (通过变暗来表示停止状态)
-        DeviceOverlay { source: @image-url("../../PNG_1280/纯水机.png"); active: root.q_water_maker; }
+        DeviceOverlay { source: @image-url("../../PNG_1280/纯水机.png"); active: root.q_water_maker; tint_color: #38bdf8; }
         DeviceOverlay { source: @image-url("../../PNG_1280/压缩机.png"); active: root.q_air_compressor; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阳极泵.png"); active: root.q_valve_anode; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阳极阀.png"); active: root.q_valve_anode; }
