@@ -259,11 +259,27 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
         return;
     }
 
-    let system_running = !data.sys_alarm && !data.i_emergency;
-    let cathode_running = system_running && data.q_valve_cathode;
-    let anode_running = system_running && data.q_valve_anode;
-    let water_running = system_running && data.q_water_maker;
-    let air_running = system_running && data.q_air_compressor;
+    let calc_pump_percent = |aqw: u16| -> f32 {
+        let v = aqw as f32;
+        let min_v = 4147.0; // 1.5V -> ~4147 (27648 * 0.15)
+        let max_v = 13824.0; // 5.0V -> ~13824 (27648 * 0.5)
+        if v <= min_v {
+            0.0
+        } else if v >= max_v {
+            100.0
+        } else {
+            (v - min_v) / (max_v - min_v) * 100.0
+        }
+    };
+
+    let pump_anode_percent = calc_pump_percent(data.aqw32);
+    let pump_cathode_percent = calc_pump_percent(data.aqw34);
+
+    // 只要有动作信号或泵在运转，就显示管线流动，不再被总报警强行截断，反映真实设备状态
+    let cathode_running = data.q_valve_cathode || data.pump_cathode_enable || pump_cathode_percent > 0.0;
+    let anode_running = data.q_valve_anode || data.pump_anode_enable || pump_anode_percent > 0.0;
+    let water_running = data.q_water_maker;
+    let air_running = data.q_air_compressor;
 
     ui.set_q_valve_anode(data.q_valve_anode);
     ui.set_q_valve_cathode(data.q_valve_cathode);
@@ -277,12 +293,15 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
     ui.set_level_cathode(data.level_cathode);
     ui.set_flow_anode(data.flow_anode);
     ui.set_flow_cathode(data.flow_cathode);
+    ui.set_pump_anode_percent(pump_anode_percent);
+    ui.set_pump_cathode_percent(pump_cathode_percent);
     ui.set_sys_alarm(data.sys_alarm);
-    ui.set_flow_pure_to_cathode(water_running && cathode_running);
+    
+    ui.set_flow_pure_to_cathode(water_running || cathode_running);
     ui.set_flow_cathode_valve_to_corner(cathode_running);
     ui.set_flow_cathode_vertical(cathode_running);
     ui.set_flow_cathode_top(cathode_running);
-    ui.set_flow_pure_to_anode_cell(water_running && anode_running);
+    ui.set_flow_pure_to_anode_cell(water_running || anode_running);
     ui.set_flow_anode_cell_to_valve(anode_running);
     ui.set_flow_anode_valve_to_corner(anode_running);
     ui.set_flow_anode_vertical(anode_running);

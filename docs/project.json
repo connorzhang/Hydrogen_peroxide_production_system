@@ -1,0 +1,16 @@
+﻿{
+    "id":  "h2o2_system",
+    "title":  "双氧水生产控制系统",
+    "description":  "S7-200 SMART 双氧水生产平台，包含 PLC 顺控、网页调试面板和 Rust/Slint 原生上位机。",
+    "tags":  [
+                 "工业控制",
+                 "PLC",
+                 "上位机",
+                 "生产系统"
+             ],
+    "icon":  "⚗️",
+    "repo":  "git@github.com:connorzhang/Hydrogen_peroxide_production_system.git",
+    "doc_version":  "v2026.06.21.2337",
+    "doc_synced_at":  "2026-06-21T23:37:37+08:00",
+    "doc_source_commit":  "37b5b9149fe3ad0aff87a4be0a779461f20f65c2"
+}

@@ -1,0 +1,13 @@
+﻿[
+  "index",
+  {
+    "type": "dir",
+    "name": "guide",
+    "label": " 使用指南"
+  },
+  {
+    "type": "dir",
+    "name": "reference",
+    "label": " 参考资料"
+  }
+]
