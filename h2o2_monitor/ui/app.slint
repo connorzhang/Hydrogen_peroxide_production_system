@@ -180,18 +180,11 @@ export component AppWindow inherits Window {
 
         // 4. 设备与管道覆盖层 (静态组件叠加)
         Image { source: @image-url("../../PNG_1280/管道流露.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/纯水机.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/压缩机.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阳极泵.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阳极阀.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阳极流量.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阳极液位.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极压力高压罐压力.png"); width: 100%; height: 100%; }
+        Image { source: @image-url("../../PNG_1280/高压罐压力.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阳极压力.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阴极泵.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阳极补水阀.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阴极阀.png"); width: 100%; height: 100%; }
-        Image { source: @image-url("../../PNG_1280/阴极补水阀.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极流量.png"); width: 100%; height: 100%; }
         Image { source: @image-url("../../PNG_1280/阴极液位.png"); width: 100%; height: 100%; }
 
@@ -204,6 +197,7 @@ export component AppWindow inherits Window {
         DeviceOverlay { source: @image-url("../../PNG_1280/阴极阀.png"); active: root.q_valve_cathode; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阴极补水阀.png"); active: root.q_valve_cathode; }
         DeviceOverlay { source: @image-url("../../PNG_1280/阳极补水阀.png"); active: root.q_valve_anode; }
+        DeviceOverlay { source: @image-url("../../PNG_1280/电解槽.png"); active: root.q_dc_power; }
         
         // 5. 数据数值与静态标签层
         // 产品/反应堆相关标签
