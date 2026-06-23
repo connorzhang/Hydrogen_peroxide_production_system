@@ -255,7 +255,7 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
         ui.set_q_valve_cathode(false);
         ui.set_q_dc_power(false);
         set_all_flows(ui, false);
-        ui.set_sys_alarm(true);
+        ui.set_sys_status("通讯断开".into());
         return;
     }
 
@@ -295,8 +295,7 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
     ui.set_flow_cathode(data.flow_cathode);
     ui.set_pump_anode_percent(pump_anode_percent);
     ui.set_pump_cathode_percent(pump_cathode_percent);
-    ui.set_sys_alarm(data.sys_alarm);
-    
+
     ui.set_flow_pure_to_cathode(water_running || cathode_running);
     ui.set_flow_cathode_valve_to_corner(cathode_running);
     ui.set_flow_cathode_vertical(cathode_running);
@@ -307,6 +306,23 @@ fn apply_plc_data(ui: &AppWindow, data: PlcData) {
     ui.set_flow_anode_vertical(anode_running);
     ui.set_flow_anode_upper(anode_running);
     ui.set_flow_air_compressor(air_running);
+    ui.set_sys_status(sequence_text(data.sequence_startup, data.sequence_shutdown).into());
+}
+
+fn sequence_text(startup: u8, shutdown: u8) -> &'static str {
+    if shutdown == 10 {
+        return "停机中";
+    }
+    if shutdown == 20 {
+        return "停机中";
+    }
+    match startup {
+        0 => "待机中",
+        10 => "工作中",
+        20 => "工作中",
+        30 => "工作中",
+        _ => "工作中",
+    }
 }
 
 fn set_all_flows(ui: &AppWindow, active: bool) {

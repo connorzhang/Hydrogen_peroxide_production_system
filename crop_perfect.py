@@ -1,7 +1,8 @@
 ﻿import numpy as np
 from PIL import Image
 
-orig = np.array(Image.open('PNG_1280/整体效果.png').convert('RGBA'))
+# Use the transparent, text-free image
+orig = np.array(Image.open('PNG_1280/pure_machine_network.png').convert('RGBA'))
 
 boxes = {
     '电解槽': (479, 807, 277, 541),
@@ -23,7 +24,6 @@ boxes = {
 }
 
 for name, (x1, x2, y1, y2) in boxes.items():
-    # Expand box by 3 pixels to ensure we don't cut edges
     x1, x2 = max(0, x1-3), min(orig.shape[1], x2+3)
     y1, y2 = max(0, y1-3), min(orig.shape[0], y2+3)
     

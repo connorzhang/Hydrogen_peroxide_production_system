@@ -107,7 +107,7 @@ export component AppWindow inherits Window {
     in property <bool> q_valve_anode: true;
     in property <bool> q_valve_cathode: true;
     in property <bool> q_dc_power: true;
-    in property <bool> sys_alarm: false;
+    in property <string> sys_status: "待机中";
 
     in property <bool> flow_pure_to_cathode: false;
     in property <bool> flow_cathode_valve_to_corner: false;
@@ -245,23 +245,20 @@ export component AppWindow inherits Window {
         Text { x: parent.width * 0.5600; y: parent.height * 0.7600; text: "阳极补水阀"; color: #94a3b8; font-size: 14px; font-weight: 700; }
         Text { x: parent.width * 0.6800; y: parent.height * 0.7600; text: "阳极阀"; color: #94a3b8; font-size: 14px; font-weight: 700; }
         
-        Rectangle {
+        Text {
             x: parent.width * 0.4000; y: parent.height * 0.9000;
             width: parent.width * 0.2000; height: parent.height * 0.1000;
-            background: transparent;
+            horizontal-alignment: center; vertical-alignment: center;
+            text: root.sys_status;
+            color: #e2e8f0;
+            font-size: 24px; font-weight: 800;
+        }
 
-            Text {
-                width: 100%; height: 100%;
-                horizontal-alignment: center; vertical-alignment: center;
-                text: root.sys_alarm ? "系统故障/报警" : "系统正常运行";
-                color: root.sys_alarm ? #ef4444 : #10b981;
-                font-size: 24px; font-weight: 800;
-            }
-
-            TouchArea {
-                width: 100%; height: 100%;
-                clicked => { root.request_exit(); }
-            }
+        // 隐藏的退出热区 (右上角)
+        TouchArea {
+            x: parent.width * 0.95; y: 0;
+            width: parent.width * 0.05; height: parent.height * 0.05;
+            clicked => { root.request_exit(); }
         }
     }
 }
