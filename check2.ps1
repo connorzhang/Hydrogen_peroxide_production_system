@@ -1,0 +1,1 @@
+Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile("D:\GIT\rust\Hydrogen_peroxide_production_system\PNG\Ñô¼«ÒºÎ».png"); Write-Host "W:" $img.Width "H:" $img.Height; $img.Dispose()
