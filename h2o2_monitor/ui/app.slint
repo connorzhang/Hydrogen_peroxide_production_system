@@ -6,12 +6,28 @@ global AnimState {
 }
 
 // 覆盖设备的图片组件 (用于状态变暗)
-component DeviceOverlay inherits Image {
+component DeviceOverlay inherits Rectangle {
     in property <bool> active: true;
+    in property <image> source;
     width: 100%;
     height: 100%;
-    opacity: 1.0;
-    colorize: active ? transparent : #000000b0;
+    background: transparent;
+
+    // 1. 永远绘制原本的正常彩色图像
+    Image {
+        source: root.source;
+        width: 100%;
+        height: 100%;
+    }
+    
+    // 2. 停机时，在上方叠加一层与原图形状完全相同的黑色半透明遮罩
+    Image {
+        source: root.source;
+        width: 100%;
+        height: 100%;
+        colorize: #000000b0;
+        visible: !root.active;
+    }
 }
 
 // --- 核心流动效果组件 ---
