@@ -67,7 +67,11 @@ LD     SM0.0
 MOVW   C0, VW1360
 MOVW   C1, VW1362
 
-Network 12 
+Network 12
+LD     SM0.0
+CALL   SBR_PWR:SBR9
+
+Network 13 
 LD     SM0.0
 MOVD   HC1, VD1404
 MOVD   HC2, VD1408
@@ -520,5 +524,38 @@ Network 3
 LD     V2302.4
 R      Q1.1, 1
 R      V2302.4, 1
+
+END_SUBROUTINE_BLOCK
+
+SUBROUTINE_BLOCK SBR_PWR:SBR9
+TITLE=直流电源 Modbus 独立控制模块
+BEGIN
+Network 1 // 初始化参数
+LD     SM0.1
+MOVB   1, VB3100
+MOVD   9600, VD3104
+MOVB   0, VB3108
+MOVB   1, VB3109
+MOVW   1000, VW3110
+
+Network 2 // 调用 MB_CTRL2
+// 预留位置供梯形图手动拖入 MB_CTRL2 指令
+
+Network 3 // 10秒延时
+LD     Q1.2
+TON    T38, 100
+
+Network 4 // 发送开启命令参数准备
+LD     T38
+EU
+=      M10.4
+MOVB   1, VB3112
+MOVB   1, VB3113
+MOVD   40002, VD3114
+MOVW   1, VW3118
+MOVD   &VB3104, VD3120
+
+Network 5 // 调用 MB_MSG2
+// 预留位置供梯形图手动拖入 MB_MSG2 指令
 
 END_SUBROUTINE_BLOCK

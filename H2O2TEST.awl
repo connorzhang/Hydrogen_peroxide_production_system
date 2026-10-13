@@ -1,0 +1,63 @@
+SUBROUTINE_BLOCK SBR_PWR:SBR9
+TITLE=直流电源 Modbus 独立控制模块
+BEGIN
+Network 1 
+Network 2 //  初始化 Modbus (7个参数)
+
+
+
+
+
+
+LD     SM0.1
+MOVB   1, VB3100
+MOVD   9600, VD3104
+MOVB   0, VB3108
+MOVB   1, VB3109
+MOVW   1000, VW3110
+Network 3 //  10秒延时
+
+
+LD     Q1.2
+TON    T38, 100
+Network 4 
+LD     SM0.0
+=      L60.0
+LD     SM0.0
+=      L63.7
+LD     L60.0
+CALL   SBR6, L63.7, VD3104, VB3108, VB3109, VW3110, M10.2, VB3102
+Network 5 
+//  发送开启命令 (8个参数)
+
+
+
+
+
+
+
+
+LD     T38
+EU
+=      M10.4
+MOVB   1, VB3112
+MOVB   1, VB3113
+MOVD   40002, VD3114
+MOVW   1, VW3118
+MOVD   &VB3104, VD3120
+Network 6 //  发送开启命令 (8个参数)
+
+
+
+
+
+
+
+
+LD     SM0.0
+=      L60.0
+LD     SM0.0
+=      L63.7
+LD     L60.0
+CALL   SBR7, L63.7, VB3112, VB3113, VD3114, VW3118, &VB3104, M10.3, VB3106
+END_SUBROUTINE_BLOCK
